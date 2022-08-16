@@ -13,12 +13,23 @@ class BaseFactory(factory.Factory):
         return object
 
 
-class ComplainerFactory(BaseFactory):
+class CustomerFactory(BaseFactory):
     class Meta:
         model = CustomerModel
 
     id = factory.Sequence(lambda n: n)
-    username = factory.Faker("username")
+    username = factory.Faker('user_name')
+    email = factory.Faker("email")
+    password = factory.Faker("password")
+    role = UserRoles.customer
+
+
+class OwnerFactory(BaseFactory):
+    class Meta:
+        model = CustomerModel
+
+    id = factory.Sequence(lambda n: n)
+    username = factory.Faker('user_name')
     email = factory.Faker("email")
     password = factory.Faker("password")
     role = UserRoles.customer

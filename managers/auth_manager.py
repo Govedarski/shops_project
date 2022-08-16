@@ -19,7 +19,8 @@ class AuthManager:
             raise Unauthorized("Missing token")
         try:
             payload = jwt.decode(token, key=config("JWT_SECRET"), algorithms=["HS256"])
-            return payload["sub"]
+            return {"id": payload["sub"], "role": payload["role"]}
+
         except ExpiredSignatureError:
             raise Unauthorized("Token expired")
         except InvalidTokenError:
