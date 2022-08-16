@@ -1,4 +1,5 @@
+from resources.auth_resources import RegisterResource
 
 routes = (
-    ("pass", "pass"),
+    (RegisterResource, "/register"),
 )

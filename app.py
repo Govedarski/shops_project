@@ -6,7 +6,6 @@ from flask_restful import Api
 from db import db
 from resources.routes import routes
 
-
 app = Flask(__name__)
 configuration = config("CONFIGURATION")
 app.config.from_object(configuration)
@@ -22,7 +21,7 @@ def return_response(response):
     return response
 
 
-# [api.add_resource(*route_data) for route_data in routes]
+[api.add_resource(*route_data) for route_data in routes]
 
 if __name__ == '__main__':
     app.run()
