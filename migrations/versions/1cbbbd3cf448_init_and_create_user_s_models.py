@@ -1,8 +1,8 @@
-"""Initial migration - Create CustomerModel, OwnerModel and AdminModel
+"""Init and create user's models
 
-Revision ID: b271fa15c57c
+Revision ID: 1cbbbd3cf448
 Revises: 
-Create Date: 2022-08-16 15:36:36.493837
+Create Date: 2022-08-16 17:13:11.738526
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b271fa15c57c'
+revision = '1cbbbd3cf448'
 down_revision = None
 branch_labels = None
 depends_on = None

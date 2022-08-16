@@ -1,15 +1,14 @@
-# from models.user import ComplainerModel, ApproverModel
 from werkzeug.security import generate_password_hash
 
 from db import db
 from managers.auth_manager import AuthManager
-from models import CustomerModel, UserRoles, ShopOwnerModel
+from utils import helpers
 
 
 class UserManager:
     @staticmethod
     def register(data):
-        user_model = ShopOwnerModel if data.pop('role') == UserRoles.owner.name else CustomerModel
+        user_model = helpers.get_user_model(data.pop('role'))
         data["password"] = generate_password_hash(data["password"])
         user = user_model(**data)
         db.session.add(user)
