@@ -1,12 +1,12 @@
 from flask_testing import TestCase
 
 from config import create_app
-from constants.constants import TEST_CONFIGURATION
 from db import db
+from tests.constants import TEST_CONFIGURATION
 
 
 class BaseTestCase(TestCase):
-    _HEADERS_CONT_TYPE_JSON = {"Content-Type": "application/json"}
+    _HEADER_CONT_TYPE_JSON = {"Content-Type": "application/json"}
 
     def create_app(self):
         return create_app(TEST_CONFIGURATION)

@@ -6,6 +6,6 @@ class CustomerSchemaOut(Schema):
     pass
 
 
-class OwnerSchemaOut(Schema):
+class ShopOwnerSchemaOut(Schema):
     # Todo
     pass

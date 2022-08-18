@@ -35,3 +35,22 @@ class ValidateIsAlphaNumeric(BaseCustomValidator):
     def validate(self, value):
         if not value.isalnum():
             raise ValidationError(self._get_error_message(value))
+
+
+class ValidateIsNumeric(BaseCustomValidator):
+    ERROR = "Must contain only numbers!"
+
+    def validate(self, value):
+        try:
+            int(value)
+        except ValueError:
+            raise ValidationError(self._get_error_message(value))
+
+
+class ValidatePhotoExtension(BaseCustomValidator):
+    _VALID_EXTENSIONS = ["jpg", "jpeg", "png"]
+    ERROR = f"Valid photo extensions are {' and '.join(_VALID_EXTENSIONS)}!"
+
+    def validate(self, value):
+        if value not in self._VALID_EXTENSIONS:
+            raise ValidationError(self._get_error_message(value))

@@ -13,22 +13,28 @@ class BaseUserModel(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     registered_on = db.Column(db.DateTime, server_default=func.now(), nullable=False)
+    last_changed = db.Column(db.DateTime, onupdate=func.now())
 
 
 class CustomerModel(BaseUserModel):
     __tablename__ = 'customer'
+    __table_args__ = {'extend_existing': True}
     query: Query
 
     role = db.Column(db.Enum(UserRoles), default=UserRoles.customer, nullable=False)
-    # Todo link one-to-one to customer profile
+
+    details = db.relationship('CustomerDetailsModel', backref='customer', uselist=False)
+    delivery_address = db.relationship('DeliveryAddressDetailsModel', backref='customer')
 
 
 class ShopOwnerModel(BaseUserModel):
     __tablename__ = 'shop_owner'
+    __table_args__ = {'extend_existing': True}
     query: Query
 
     role = db.Column(db.Enum(UserRoles), default=UserRoles.owner, nullable=False)
-    # Todo link one-to-one to owner profile
+    details = db.relationship('ShopOwnerDetailsModel', backref='shop_owner', uselist=False)
+    shops = db.relationship('ShopModel', backref='shop_owner')
 
 
 class AdminModel(BaseUserModel):
