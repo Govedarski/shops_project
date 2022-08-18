@@ -47,7 +47,16 @@ class CustomerDetailsManager:
     @staticmethod
     def edit(data, pk):
         customer_details = CustomerDetailsManager.get_details(pk)
+
+        photo_str = data.pop("photo") if data.get("photo") else None
+        extension = data.pop("extension") if data.get("extension") else None
+
         CustomerDetailsModel.query.filter_by(id=customer_details.id).update(data)
+        if has_photo(photo_str, extension):
+            CustomerDetailsManager.change_profile_picture(
+                {"photo": photo_str, "extension": extension},
+                customer_details.id)
+
         return customer_details
 
     @staticmethod

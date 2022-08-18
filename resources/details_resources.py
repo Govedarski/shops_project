@@ -4,8 +4,7 @@ from flask_restful import Resource
 from managers.auth_manager import auth
 from managers.details_managers import CustomerDetailsManager
 from models import UserRoles
-from schemas.request.details_schemas_in import ChangeProfilePictureSchemaIn, CreateCustomerDetailsSchemaIn, \
-    EditCustomerDetailsSchemaIn
+from schemas.request.details_schemas_in import ChangeProfilePictureSchemaIn, CustomerDetailsSchemaIn
 from schemas.response.details_schemas_out import DetailsSchemaOut
 from utils.decorators import permission_required, validate_schema
 
@@ -13,7 +12,7 @@ from utils.decorators import permission_required, validate_schema
 class CreateCustomerDetailsResource(Resource):
     @auth.login_required
     @permission_required(UserRoles.customer)
-    @validate_schema(CreateCustomerDetailsSchemaIn)
+    @validate_schema(CustomerDetailsSchemaIn)
     def post(self):
         data = request.get_json()
         current_user = auth.current_user()
@@ -29,7 +28,7 @@ class CustomerDetailsResource(Resource):
 
     @auth.login_required
     @permission_required(UserRoles.customer)
-    @validate_schema(EditCustomerDetailsSchemaIn)
+    @validate_schema(CustomerDetailsSchemaIn)
     def put(self, pk):
         data = request.get_json()
         customer_details = CustomerDetailsManager.edit(data, pk)

@@ -109,20 +109,22 @@ class TestCustomerDetails(BaseTestCase):
         self.assertEqual(404, resp.status_code)
         self.assertEqual(f"Details with id: 1 are not found!", resp.json["message"])
 
-    def test_edit_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self):
+    @patch.object(s3, "upload_photo", return_value="some.s3.url")
+    def test_edit_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         customer_details = self._create_customer_details_in_test_db(self.VALID_REQUIRED_DATA)
         url = self.BASE_URL + "/" + str(customer_details.id)
-        data = {
-            "first_name": "TestchoEdit",
-            "last_name": "TestchovEdit"}
+        data = {"first_name": "TestchoEdit",
+                "last_name": "TestchovEdit"} | self.VALID_PHOTO_DATA
 
         resp = self.client.put(url, headers=self._HEADERS, json=data)
 
         self.assertEqual(200, resp.status_code)
         self.assertEqual(data["first_name"], resp.json["first_name"])
         self.assertEqual(data["last_name"], resp.json["last_name"])
+        self.assertEqual(mocked_s3.return_value, resp.json["profile_picture_url"])
         self.assertEqual(data["first_name"], customer_details.first_name)
         self.assertEqual(data["last_name"], customer_details.last_name)
+        self.assertEqual(mocked_s3.return_value, customer_details.profile_picture_url)
 
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_change_profile_picture_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):

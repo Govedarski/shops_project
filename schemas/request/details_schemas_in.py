@@ -3,7 +3,7 @@ from marshmallow import Schema, fields, validate
 from schemas.validators.common_validators import ValidateIsAlpha, ValidateIsNumeric, ValidatePhotoExtension
 
 
-class BaseCustomerDetails(Schema):
+class CustomerDetailsSchemaIn(Schema):
     first_name = fields.Str(required=True,
                             validate=validate.And(
                                 validate.Length(min=2, max=64),
@@ -23,15 +23,9 @@ class BaseCustomerDetails(Schema):
         ValidateIsNumeric().validate
     ))
 
-
-class CreateCustomerDetailsSchemaIn(BaseCustomerDetails):
     photo = fields.String()
 
     extension = fields.String(validate=ValidatePhotoExtension().validate)
-
-
-class EditCustomerDetailsSchemaIn(BaseCustomerDetails):
-    pass
 
 
 class ChangeProfilePictureSchemaIn(Schema):
