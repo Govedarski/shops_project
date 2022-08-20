@@ -1,7 +1,7 @@
 import base64
 import uuid
 
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, NotFound
 
 from models import UserRoles, CustomerModel, ShopOwnerModel
 
@@ -13,6 +13,15 @@ def get_user_model(role):
         return ShopOwnerModel
     else:
         raise BadRequest("Invalid user role!")
+
+
+def get_or_404(model, pk, message=None):
+    if not message:
+        message = "Page not found!"
+
+    instance = model.query.filter_by(id=pk).first()
+    if not instance:
+        raise NotFound(message)
 
 
 def decode_file(encoded_file):

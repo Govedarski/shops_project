@@ -1,5 +1,6 @@
 from resources.auth_resources import RegisterResource, LoginResource
-from resources.details_resources import CustomerDetailsResource, CreateCustomerDetailsResource, ProfilePictureResource
+from resources.customer_details_resources import CreateCustomerDetailsResource, CustomerDetailsResource, \
+    CustomerProfilePictureResource, CreateShopOwnerDetailsResource, ShopOwnerDetailsResource
 
 routes = (
     (RegisterResource, "/register"),
@@ -11,7 +12,12 @@ routes = (
     #
     (CreateCustomerDetailsResource, "/customer/details/create"),
     (CustomerDetailsResource, "/customer/details/<int:pk>"),
-    (ProfilePictureResource, "/customer/details/<int:pk>/profile_picture"),
+    (CustomerProfilePictureResource, "/customer/details/<int:pk>/profile_picture"),
+
+    (CreateShopOwnerDetailsResource, "/shop_owner/details/create"),
+    (ShopOwnerDetailsResource, "/shop_owner/details/<int:pk>"),
+    # (ShopOwnerProfilePictureResource, "/shop_owner/details/<int:pk>/profile_picture"),
+    # (ShopOwnerDocumentsResource, "/shop_owner/details/<int:pk>/documents"),
 
     # ("pass", "/customer/delivery_details"),
     # ("pass", "/customer/delivery_details/create"),

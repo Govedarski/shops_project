@@ -1,0 +1,3 @@
+IMAGE_SUFFIX_IN_DB = "_image_url"
+IMAGE_SUFFIX_IN_SCHEMA = "_photo"
+EXTENSION_SUFFIX_IN_SCHEMA = "_extension"

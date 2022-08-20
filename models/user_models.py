@@ -35,6 +35,7 @@ class ShopOwnerModel(BaseUserModel):
     role = db.Column(db.Enum(UserRoles), default=UserRoles.owner, nullable=False)
     details = db.relationship('ShopOwnerDetailsModel', backref='shop_owner', uselist=False)
     shops = db.relationship('ShopModel', backref='shop_owner')
+    confirmed = db.Column(db.Boolean, default=False, nullable=False)
 
 
 class AdminModel(BaseUserModel):

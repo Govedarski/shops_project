@@ -1,4 +1,5 @@
 from marshmallow import ValidationError
+from schwifty import IBAN
 
 from schemas.validators.base_custom_validator import BaseCustomValidator
 
@@ -26,7 +27,7 @@ class ValidateIsAlpha(BaseCustomValidator):
 
     def validate(self, value):
         if not value.isalpha():
-            raise ValidationError(self._get_error_message(value))
+            raise ValidationError(self.ERROR)
 
 
 class ValidateIsAlphaNumeric(BaseCustomValidator):
@@ -34,7 +35,7 @@ class ValidateIsAlphaNumeric(BaseCustomValidator):
 
     def validate(self, value):
         if not value.isalnum():
-            raise ValidationError(self._get_error_message(value))
+            raise ValidationError(self.ERROR)
 
 
 class ValidateIsNumeric(BaseCustomValidator):
@@ -44,13 +45,24 @@ class ValidateIsNumeric(BaseCustomValidator):
         try:
             int(value)
         except ValueError:
-            raise ValidationError(self._get_error_message(value))
+            raise ValidationError(self.ERROR)
 
 
-class ValidatePhotoExtension(BaseCustomValidator):
-    _VALID_EXTENSIONS = ["jpg", "jpeg", "png"]
-    ERROR = f"Valid photo extensions are {' and '.join(_VALID_EXTENSIONS)}!"
+class ValidateIBAN(BaseCustomValidator):
+    ERROR = "Invalid iban!"
 
     def validate(self, value):
-        if value not in self._VALID_EXTENSIONS:
-            raise ValidationError(self._get_error_message(value))
+        try:
+            IBAN(value, validate_bban=True)
+        except ValueError:
+            raise ValidationError(self.ERROR)
+
+
+class ValidateExtension:
+    def __init__(self, file_type, valid_extensions):
+        self.file_type = file_type
+        self.valid_extensions = valid_extensions
+
+    def validate(self, value):
+        if value not in self.valid_extensions:
+            raise ValidationError(f"Valid extension for {self.file_type} are {' and '.join(self.valid_extensions)}!")
