@@ -35,6 +35,7 @@ class ShopOwnerDetailsModel(BaseDetailsModel):
     query: Query
     iban = db.Column(db.String(22), nullable=False, unique=True)
     confirm_identity_documents_image_url = db.Column(db.String(255), nullable=False)
+    verified = db.Column(db.Boolean, default=False, nullable=False)
 
     holder_id = db.Column(db.Integer, db.ForeignKey("shop_owner.id"), nullable=False, unique=True)
 
@@ -46,11 +47,15 @@ class DeliveryAddressDetailsModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
+    first_name = db.Column(db.String(64), nullable=False)
+    last_name = db.Column(db.String(64), nullable=False)
+    phone_number = db.Column(db.String(9), nullable=False)
     city = db.Column(db.String(64), nullable=False)
     address = db.Column(db.Text, nullable=False)
+
     extra_informations = db.Column(db.Text)
 
     registered_on = db.Column(db.DateTime, server_default=func.now(), nullable=False)
     last_changed = db.Column(db.DateTime, onupdate=func.now())
 
-    holder_id = db.Column(db.Integer, db.ForeignKey("customer.id"), nullable=False)
+    holder_id = db.Column(db.Integer, db.ForeignKey("customer.id"))

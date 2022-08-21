@@ -43,6 +43,8 @@ class ValidateRole(BaseAccessValidator):
     def validate(self, instance, *args, **kwargs):
         allowed_roles = self.allowed_roles or instance.ALLOWED_ROLES
         current_user = auth.current_user()
+        if not current_user:
+            return
         if current_user.role not in allowed_roles:
             raise Forbidden(self._get_error_message(instance))
 
@@ -57,7 +59,7 @@ class ValidateIsOwner(BaseAccessValidator):
             return
 
         pk = kwargs.get('pk')
-        is_holder = instance.MODEL.query.filter_by(id=pk).first().holder_id == current_user.id
+        is_holder = instance.get_model().query.filter_by(id=pk).first().holder_id == current_user.id
 
         if not is_holder:
             raise Forbidden(self._get_error_message(instance))
@@ -68,7 +70,7 @@ class ValidatePageExist(BaseAccessValidator):
     CLASS_ERROR_MESSAGE_FIELD_NAME = "NOT_FOUND_MESSAGE"
 
     def validate(self, instance, *args, **kwargs):
-        get_or_404(instance.MODEL, kwargs.get("pk"), self._get_error_message(instance))
+        get_or_404(instance.get_model(), kwargs.get("pk"), self._get_error_message(instance))
 
 
 class ValidateUniqueness(BaseAccessValidator):
@@ -77,7 +79,7 @@ class ValidateUniqueness(BaseAccessValidator):
 
     def validate(self, instance, *args, **kwargs):
         current_user = auth.current_user()
-        if instance.MODEL.query.filter_by(holder_id=current_user.id).first():
+        if instance.get_model().query.filter_by(holder_id=current_user.id).first():
             raise Forbidden(self._get_error_message(instance))
 
 
@@ -85,7 +87,7 @@ class ValidateSchema:
     @staticmethod
     def validate(instance, *args, **kwargs):
         data = request.get_json()
-        schema = instance.SCHEMA_IN()
-        errors = schema.validate(data)
+        schema = instance.get_schema_in()
+        errors = schema().validate(data)
         if errors:
             raise BadRequest(errors)

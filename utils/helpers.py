@@ -3,7 +3,7 @@ import uuid
 
 from werkzeug.exceptions import BadRequest, NotFound
 
-from models import UserRoles, CustomerModel, ShopOwnerModel
+from models import UserRoles, CustomerModel, ShopOwnerModel, AdminRoles, AdminModel
 
 
 def get_user_model(role):
@@ -13,6 +13,12 @@ def get_user_model(role):
         return ShopOwnerModel
     else:
         raise BadRequest("Invalid user role!")
+
+
+def get_user_or_admin_model(role):
+    if role in AdminRoles.__members__.keys():
+        return AdminModel
+    return get_user_model(role)
 
 
 def get_or_404(model, pk, message=None):

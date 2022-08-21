@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 from db import db
 from models import CustomerDetailsModel
-from resources.access_endpoint_validators import ValidateUniqueness
-from resources.customer_details_resources import CustomerDetailsResource
+from resources.details_resources import CustomerDetailsResource
+from resources.helpers.access_endpoint_validators import ValidateUniqueness
 from services.s3 import s3
 from tests import helpers
 from tests.base_test_case import BaseTestCase
@@ -13,8 +13,7 @@ from tests.helpers import generate_token
 
 
 class TestCustomerDetails(BaseTestCase):
-    BASE_URL = "/customer/details"
-    CREATE_URL = BASE_URL + "/create"
+    URL = "/customer/details"
     VALID_REQUIRED_DATA = {
         "first_name": "Testcho",
         "last_name": "Testchov",
@@ -32,7 +31,7 @@ class TestCustomerDetails(BaseTestCase):
         self._HEADERS = self._AUTHORIZATION_HEADER | self._HEADER_CONT_TYPE_JSON
 
     def test_create_cd_with_valid_data_and_no_photo_expect_status_201_and_details_created_with_correct_data(self):
-        resp = self.client.post(self.CREATE_URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
 
         self.assertEqual(201, resp.status_code)
         self.assertEqual(self.VALID_REQUIRED_DATA["first_name"], resp.json["first_name"])
@@ -45,7 +44,7 @@ class TestCustomerDetails(BaseTestCase):
                                                                                                          mocked_s3):
         data = self.VALID_REQUIRED_DATA | self.VALID_PHOTO_DATA
 
-        resp = self.client.post(self.CREATE_URL, headers=self._HEADERS, json=data)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=data)
 
         self.assertEqual(201, resp.status_code)
         self.assertEqual(self.VALID_REQUIRED_DATA["first_name"], resp.json["first_name"])
@@ -53,8 +52,8 @@ class TestCustomerDetails(BaseTestCase):
         self.assertEqual(mocked_s3.return_value, resp.json["profile_picture_image_url"])
 
     def test_create_cd_with_valid_data_and_creator_who_already_has_cd_expect_status_403_and_correct_error_message(self):
-        self.client.post(self.CREATE_URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
-        resp = self.client.post(self.CREATE_URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
+        self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
 
         self.assertEqual(403, resp.status_code)
         self.assertEqual(ValidateUniqueness.ERROR_MESSAGE, resp.json["message"])
@@ -66,12 +65,12 @@ class TestCustomerDetails(BaseTestCase):
         data_no_photo = self.VALID_REQUIRED_DATA | {
             "profile_picture_extension": "png",
         }
-        resp = self.client.post(self.CREATE_URL, headers=self._HEADERS, json=data_no_extension)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=data_no_extension)
 
         self.assertEqual(400, resp.status_code)
         self.assertEqual("There is not extension provided!", resp.json["message"])
 
-        resp = self.client.post(self.CREATE_URL, headers=self._HEADERS, json=data_no_photo)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=data_no_photo)
 
         self.assertEqual(400, resp.status_code)
         self.assertEqual("There is not photo provided!", resp.json["message"])
@@ -85,7 +84,7 @@ class TestCustomerDetails(BaseTestCase):
             "profile_picture_photo": ENCODED_PICTURE,
             "profile_picture_extension": "txt"
         }
-        resp = self.client.post(self.CREATE_URL, headers=self._HEADERS, json=invalid_data)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=invalid_data)
         self.assertEqual(400, resp.status_code)
         self.assertIn("Length must be between 2 and 64.", resp.json["message"]["first_name"])
         self.assertIn("Must contain only letters!", resp.json["message"]["first_name"])
@@ -98,7 +97,7 @@ class TestCustomerDetails(BaseTestCase):
 
     def test_get_cd_with_existing_cd_expect_status_200_and_correct_json(self):
         customer_details = self._create_customer_details_in_test_db(self.VALID_REQUIRED_DATA)
-        url = self.BASE_URL + "/" + str(customer_details.id)
+        url = self.URL + "/" + str(customer_details.id)
         resp = self.client.get(url, headers=self._AUTHORIZATION_HEADER)
 
         self.assertEqual(200, resp.status_code)
@@ -106,7 +105,7 @@ class TestCustomerDetails(BaseTestCase):
         self.assertEqual(self.VALID_REQUIRED_DATA["last_name"], resp.json["last_name"])
 
     def test_get_cd_with_not_existing_cd_expect_status_404_and_correct_message(self):
-        url = self.BASE_URL + "/" + "1"
+        url = self.URL + "/" + "1"
         resp = self.client.get(url, headers=self._AUTHORIZATION_HEADER)
 
         self.assertEqual(404, resp.status_code)
@@ -115,7 +114,7 @@ class TestCustomerDetails(BaseTestCase):
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_edit_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         customer_details = self._create_customer_details_in_test_db(self.VALID_REQUIRED_DATA)
-        url = self.BASE_URL + "/" + str(customer_details.id)
+        url = self.URL + "/" + str(customer_details.id)
         data = {"first_name": "TestchoEdit",
                 "last_name": "TestchovEdit"} | self.VALID_PHOTO_DATA
 
@@ -132,7 +131,7 @@ class TestCustomerDetails(BaseTestCase):
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_change_profile_picture_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         customer_details = self._create_customer_details_in_test_db(self.VALID_REQUIRED_DATA)
-        url = self.BASE_URL + "/" + str(customer_details.id)
+        url = self.URL + "/" + str(customer_details.id)
         data = self.VALID_PHOTO_DATA
 
         resp = self.client.put(url, headers=self._HEADERS, json=data)
@@ -145,7 +144,7 @@ class TestCustomerDetails(BaseTestCase):
     def test_delete_existing_profile_picture_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         data = self.VALID_REQUIRED_DATA | {"profile_picture_image_url": "some.url"}
         customer_details = self._create_customer_details_in_test_db(data)
-        url = self.BASE_URL + "/" + str(customer_details.id) + "/profile_picture"
+        url = self.URL + "/" + str(customer_details.id) + "/profile_picture"
 
         resp = self.client.delete(url, headers=self._AUTHORIZATION_HEADER)
 
@@ -154,7 +153,7 @@ class TestCustomerDetails(BaseTestCase):
 
     def test_delete_not_existing_profile_picture_expect_status_404_and_correct_message(self):
         customer_details = self._create_customer_details_in_test_db(self.VALID_REQUIRED_DATA)
-        url = self.BASE_URL + "/" + str(customer_details.id) + "/profile_picture"
+        url = self.URL + "/" + str(customer_details.id) + "/profile_picture"
 
         resp = self.client.delete(url, headers=self._AUTHORIZATION_HEADER)
         self.assertEqual(404, resp.status_code)

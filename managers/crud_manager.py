@@ -11,21 +11,21 @@ from utils.helpers import save_file, create_photo_from_json, has_photo, get_phot
 
 class CRUDManager:
     @classmethod
-    def create(cls, data, user, model):
+    def create(cls, model, data, user):
         data["holder_id"] = user.id
 
         if not hasattr(model, "get_all_image_field_names"):
-            return cls._create_in_db(data, model)
+            return cls._create_in_db(model, data)
 
         return cls._processed_with_photos(model, data)
 
     @staticmethod
-    def get(pk, model):
+    def get(model, pk):
         return model.query.filter_by(id=pk).first()
 
     @classmethod
-    def edit(cls, data, pk, model):
-        instance = cls.get(pk, model)
+    def edit(cls, model, data, pk):
+        instance = cls.get(model, pk)
         if not hasattr(model, "get_all_image_field_names"):
             model.query.filter_by(id=instance.id).update(data)
             return instance
@@ -33,8 +33,8 @@ class CRUDManager:
         return cls._processed_with_photos(model, data, instance)
 
     @classmethod
-    def delete_image(cls, pk, model, image_field_name):
-        instance = cls.get(pk, model)
+    def delete_image(cls, model, pk, image_field_name):
+        instance = cls.get(model, pk)
         image_field_name_with_suffix = image_field_name + IMAGE_SUFFIX_IN_DB
         photo = get_photo_name_by_url(getattr(instance, image_field_name_with_suffix))
         if not photo:
@@ -45,7 +45,7 @@ class CRUDManager:
         return instance
 
     @staticmethod
-    def _create_in_db(data, model):
+    def _create_in_db(model, data):
         instance = model(**data)
         db.session.add(instance)
         db.session.flush()
@@ -85,7 +85,7 @@ class CRUDManager:
                 model.query.filter_by(id=instance.id).update(data)
                 [s3.delete_photo(previous_picture) for previous_picture in previous_pictures if previous_picture]
                 return instance
-            return cls._create_in_db(data, model)
+            return cls._create_in_db(model, data)
 
         except Exception:
             [s3.delete_photo(photo_name) for photo_name in photo_names]

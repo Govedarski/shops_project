@@ -23,3 +23,7 @@ class RegisterSchemaIn(Schema):
 
     password = fields.Str(required=True,
                           validate=PasswordValidator().validate_password)
+
+
+class RegisterAdminSchemaIn(Schema):
+    role = EnumField(UserRoles, required=True, error_messages={'by_name': "Invalid role"})

@@ -1,7 +1,7 @@
 import factory
 
 from db import db
-from models import UserRoles, CustomerModel
+from models import UserRoles, CustomerModel, AdminModel, AdminRoles
 
 
 class BaseFactory(factory.Factory):
@@ -13,23 +13,38 @@ class BaseFactory(factory.Factory):
         return object
 
 
-class CustomerFactory(BaseFactory):
-    class Meta:
-        model = CustomerModel
-
-    id = factory.Sequence(lambda n: n)
+class BaseUserFactory(BaseFactory):
+    id = factory.Sequence(lambda n: n + 100)
     username = factory.Faker('user_name')
     email = factory.Faker("email")
     password = factory.Faker("password")
-    role = UserRoles.customer
 
 
-class OwnerFactory(BaseFactory):
+class CustomerFactory(BaseUserFactory):
     class Meta:
         model = CustomerModel
 
-    id = factory.Sequence(lambda n: n)
-    username = factory.Faker('user_name')
-    email = factory.Faker("email")
-    password = factory.Faker("password")
     role = UserRoles.customer
+
+
+class OwnerFactory(BaseUserFactory):
+    class Meta:
+        model = CustomerModel
+
+    role = UserRoles.customer
+
+
+class AdminFactory(BaseUserFactory):
+    id = factory.Sequence(lambda n: n + 10000)
+
+    class Meta:
+        model = AdminModel
+
+    role = AdminRoles.admin
+
+
+class SuperAdminFactory(BaseUserFactory):
+    class Meta:
+        model = AdminModel
+
+    role = AdminRoles.super_admin

@@ -1,12 +1,15 @@
 from managers.auth_manager import auth
-from models import CustomerDetailsModel, UserRoles, AdminRoles, ShopOwnerDetailsModel
-from resources.access_endpoint_validators import ValidateRole, ValidateUniqueness, ValidateSchema, ValidatePageExist, \
+from models import CustomerDetailsModel, UserRoles, AdminRoles, ShopOwnerDetailsModel, DeliveryAddressDetailsModel
+from resources.helpers.access_endpoint_validators import ValidateRole, ValidateUniqueness, ValidateSchema, \
+    ValidatePageExist, \
     ValidateIsOwner
-from resources.crud_resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
+from resources.helpers.crud_resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
     DeleteImageResourceMixin
 from schemas.request.details_schemas_in import CreateDetailsSchemaIn, \
-    CreateShopOwnerDetailsSchemaIn, EditShopOwnerDetailsSchemaIn, EditDetailsSchemaIn
-from schemas.response.details_schemas_out import DetailsSchemaOut, ShopOwnerDetailsSchemaOut
+    CreateShopOwnerDetailsSchemaIn, EditShopOwnerDetailsSchemaIn, EditDetailsSchemaIn, \
+    AuthCreateDeliveryAddressDetailsSchemaIn, NoAuthCreateDeliveryAddressDetailsSchemaIn
+from schemas.response.details_schemas_out import DetailsSchemaOut, ShopOwnerDetailsSchemaOut, \
+    DeliveryAddressDetailsSchemaOut
 from utils.resource_decorators import execute_access_validators
 
 
@@ -98,9 +101,53 @@ class ShopOwnerDetailsResource(RemoveIbanSpacesMixin, DetailsResource):
     NOT_FOUND_MESSAGE = "Shop owner details not found!"
 
 
+class VerifyShopOwnerDetailsResource(EditResourceMixin):
+    MODEL = ShopOwnerDetailsModel
+    SCHEMA_OUT = ShopOwnerDetailsSchemaOut
+    ALLOWED_ROLES = [AdminRoles.admin, AdminRoles.super_admin]
+
+    @auth.login_required
+    @execute_access_validators(
+        ValidatePageExist(),
+        ValidateRole(),
+    )
+    def put(self, pk):
+        return super().put(pk)
+
+    def get_data(self):
+        return {"verified": True}
+
+
 class ShopOwnerProfilePictureResource(DetailsImageResource):
     MODEL = ShopOwnerDetailsModel
     SCHEMA_OUT = DetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
     IMAGE_FIELD_NAME = "profile_picture"
     NOT_FOUND_MESSAGE = "Shop owner details not found!"
+
+
+class CreateDeliveryAddressDetailsResource(CreateResourceMixin):
+    MODEL = DeliveryAddressDetailsModel
+    SCHEMA_OUT = DeliveryAddressDetailsSchemaOut
+    ALLOWED_ROLES = [UserRoles.customer]
+
+    @execute_access_validators(
+        ValidateRole(),
+        ValidateSchema(),
+    )
+    def post(self):
+        return super().post()
+
+    def get_schema_in(self):
+        current_user = auth.current_user()
+        if current_user:
+            return AuthCreateDeliveryAddressDetailsSchemaIn
+        return NoAuthCreateDeliveryAddressDetailsSchemaIn
+
+    def get_data(self):
+        data = super().get_data()
+        current_user = auth.current_user()
+        if current_user:
+            data['first_name'] = current_user.details.first_name
+            data['last_name'] = current_user.details.last_name
+        return data

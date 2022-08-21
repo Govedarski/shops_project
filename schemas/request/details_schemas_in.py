@@ -56,3 +56,35 @@ class CreateShopOwnerDetailsSchemaIn(CreateDetailsSchemaIn):
 
 class EditShopOwnerDetailsSchemaIn(EditDetailsSchemaIn):
     iban = fields.String(validate=ValidateIBAN().validate)
+
+
+class AuthCreateDeliveryAddressDetailsSchemaIn(Schema):
+    phone_number = fields.Str(required=True,
+                              validate=validate.And(
+                                  validate.Length(equal=9),
+                                  ValidateIsNumeric().validate
+                              ))
+
+    city = fields.Str(required=True,
+                      validate=validate.And(
+                          validate.Length(min=2, max=64),
+                          ValidateIsAlpha().validate
+                      ))
+
+    address = fields.Str(required=True)
+
+    extra_informations = fields.Str()
+
+
+class NoAuthCreateDeliveryAddressDetailsSchemaIn(AuthCreateDeliveryAddressDetailsSchemaIn):
+    first_name = fields.Str(required=True,
+                            validate=validate.And(
+                                validate.Length(min=2, max=64),
+                                ValidateIsAlpha().validate
+                            ))
+
+    last_name = fields.Str(required=True,
+                           validate=validate.And(
+                               validate.Length(min=2, max=64),
+                               ValidateIsAlpha().validate
+                           ))
