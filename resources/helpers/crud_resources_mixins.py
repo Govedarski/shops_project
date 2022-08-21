@@ -14,16 +14,16 @@ class BaseResource(Resource):
     SCHEMA_OUT = None
 
     @staticmethod
-    def get_data():
-        return request.get_json()
+    def get_data(*args, **kwargs):
+        return request.get_json() if request.data else None
 
-    def get_model(self):
+    def get_model(self, *args, **kwargs):
         return self.MODEL
 
-    def get_schema_in(self):
+    def get_schema_in(self, *args, **kwargs):
         return self.SCHEMA_IN
 
-    def get_schema_out(self):
+    def get_schema_out(self, *args, **kwargs):
         return self.SCHEMA_OUT
 
 
@@ -44,7 +44,7 @@ class GetResourceMixin(ABC, BaseResource):
     @abstractmethod
     def get(self, pk):
         instance = CRUDManager.get(self.get_model(), pk)
-        return self.get_schema_out()().dump(instance), 200
+        return self.get_schema_out(pk=pk)().dump(instance), 200
 
 
 class EditResourceMixin(ABC, BaseResource):
@@ -52,9 +52,10 @@ class EditResourceMixin(ABC, BaseResource):
 
     @abstractmethod
     def put(self, pk):
+        p = 1
         data = self.get_data()
         instance = CRUDManager.edit(self.get_model(), data, pk)
-        return self.get_schema_out()().dump(instance), 200
+        return self.get_schema_out(pk=pk)().dump(instance), 200
 
 
 class DeleteImageResourceMixin(ABC, BaseResource):

@@ -85,9 +85,11 @@ class CRUDManager:
                 model.query.filter_by(id=instance.id).update(data)
                 [s3.delete_photo(previous_picture) for previous_picture in previous_pictures if previous_picture]
                 return instance
-            return cls._create_in_db(model, data)
+            instance = cls._create_in_db(model, data)
+            return instance
 
-        except Exception:
+        except Exception as ex:
+            p = ex
             [s3.delete_photo(photo_name) for photo_name in photo_names]
         finally:
             [os.remove(path) for path in paths]

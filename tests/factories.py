@@ -1,7 +1,7 @@
 import factory
 
 from db import db
-from models import UserRoles, CustomerModel, AdminModel, AdminRoles
+from models import UserRoles, CustomerModel, AdminModel, AdminRoles, ShopOwnerModel
 
 
 class BaseFactory(factory.Factory):
@@ -29,9 +29,9 @@ class CustomerFactory(BaseUserFactory):
 
 class OwnerFactory(BaseUserFactory):
     class Meta:
-        model = CustomerModel
+        model = ShopOwnerModel
 
-    role = UserRoles.customer
+    role = UserRoles.owner
 
 
 class AdminFactory(BaseUserFactory):

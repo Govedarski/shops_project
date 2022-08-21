@@ -5,7 +5,7 @@ from schemas.validators.common_validators import ValidateIsAlpha, ValidateIsNume
 
 
 class BaseDetailsSchemaIn(Schema):
-    age = fields.Integer(validate=validate.Range(min=16, max=100))
+    age = fields.Integer(validate=validate.Range(min=18, max=100))
 
     phone_number = fields.Str(validate=validate.And(
         validate.Length(equal=9),

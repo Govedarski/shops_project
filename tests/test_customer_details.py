@@ -90,9 +90,9 @@ class TestCustomerDetails(BaseTestCase):
         self.assertIn("Must contain only letters!", resp.json["message"]["first_name"])
         self.assertIn("Length must be between 2 and 64.", resp.json["message"]["last_name"])
         self.assertIn("Must contain only letters!", resp.json["message"]["last_name"])
-        self.assertIn("Must be greater than or equal to 16 and less than or equal to 100.", resp.json["message"]["age"])
+        self.assertIn("Must be greater than or equal to 18 and less than or equal to 100.", resp.json["message"]["age"])
         self.assertIn("Length must be 9.", resp.json["message"]["phone_number"])
-        self.assertIn("Valid extension for photos are jpg and jpeg and png!",
+        self.assertIn("Valid extension for photos are jpg, jpeg, png!",
                       resp.json["message"]["profile_picture_extension"])
 
     def test_get_cd_with_existing_cd_expect_status_200_and_correct_json(self):

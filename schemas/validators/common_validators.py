@@ -65,4 +65,4 @@ class ValidateExtension:
 
     def validate(self, value):
         if value not in self.valid_extensions:
-            raise ValidationError(f"Valid extension for {self.file_type} are {' and '.join(self.valid_extensions)}!")
+            raise ValidationError(f"Valid extension for {self.file_type} are {', '.join(self.valid_extensions)}!")

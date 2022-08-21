@@ -57,7 +57,8 @@ class DetailsImageResource(DeleteImageResourceMixin):
 class RemoveIbanSpacesMixin:
     def get_data(self):
         data = super().get_data()
-        if hasattr(data, "iban"):
+        iban = data.get("iban")
+        if iban:
             data["iban"] = data["iban"].replace(" ", "")
 
         return data
@@ -100,6 +101,15 @@ class ShopOwnerDetailsResource(RemoveIbanSpacesMixin, DetailsResource):
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
     NOT_FOUND_MESSAGE = "Shop owner details not found!"
 
+    def get_schema_out(self, **kwargs):
+        current_user = auth.current_user()
+        pk = kwargs.get('pk')
+        shop_owner_details = self.get_model().query.filter_by(id=pk).first()
+        if current_user.role in AdminRoles or current_user.id == shop_owner_details.holder_id:
+            return ShopOwnerDetailsSchemaOut
+
+        return DetailsSchemaOut
+
 
 class VerifyShopOwnerDetailsResource(EditResourceMixin):
     MODEL = ShopOwnerDetailsModel
@@ -112,7 +122,10 @@ class VerifyShopOwnerDetailsResource(EditResourceMixin):
         ValidateRole(),
     )
     def put(self, pk):
-        return super().put(pk)
+        result = super().put(pk)
+        if result[1] == 200:
+            return {"verified": True}, 200
+        return result
 
     def get_data(self):
         return {"verified": True}
