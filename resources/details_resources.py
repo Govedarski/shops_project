@@ -144,6 +144,7 @@ class CreateDeliveryAddressDetailsResource(CreateResourceMixin):
     SCHEMA_OUT = DeliveryAddressDetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.customer]
 
+    @auth.login_optional
     @execute_access_validators(
         ValidateRole(),
         ValidateSchema(),

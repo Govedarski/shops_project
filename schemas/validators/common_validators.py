@@ -30,6 +30,14 @@ class ValidateIsAlpha(BaseCustomValidator):
             raise ValidationError(self.ERROR)
 
 
+class ValidateIsAlphaAndSpace(BaseCustomValidator):
+    ERROR = "Must contain only letters and spaces!"
+
+    def validate(self, value):
+        if not value.replace(" ", "").isalpha():
+            raise ValidationError(self.ERROR)
+
+
 class ValidateIsAlphaNumeric(BaseCustomValidator):
     ERROR = "Must contain only numbers and letters!"
 

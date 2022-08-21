@@ -12,7 +12,9 @@ from utils.helpers import save_file, create_photo_from_json, has_photo, get_phot
 class CRUDManager:
     @classmethod
     def create(cls, model, data, user):
-        data["holder_id"] = user.id
+        data["holder_id"] = None
+        if hasattr(model, "holder_id") and (not model.holder_id.nullable or user):
+            data["holder_id"] = user.id
 
         if not hasattr(model, "get_all_image_field_names"):
             return cls._create_in_db(model, data)

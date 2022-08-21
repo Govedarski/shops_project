@@ -1,7 +1,8 @@
 from marshmallow import Schema, fields, validate
 
 from constants.extensions import VALID_PHOTO_EXTENSIONS, VALID_DOCUMENT_EXTENSIONS
-from schemas.validators.common_validators import ValidateIsAlpha, ValidateIsNumeric, ValidateExtension, ValidateIBAN
+from schemas.validators.common_validators import ValidateIsAlpha, ValidateIsNumeric, ValidateExtension, ValidateIBAN, \
+    ValidateIsAlphaAndSpace
 
 
 class BaseDetailsSchemaIn(Schema):
@@ -68,7 +69,7 @@ class AuthCreateDeliveryAddressDetailsSchemaIn(Schema):
     city = fields.Str(required=True,
                       validate=validate.And(
                           validate.Length(min=2, max=64),
-                          ValidateIsAlpha().validate
+                          ValidateIsAlphaAndSpace().validate
                       ))
 
     address = fields.Str(required=True)

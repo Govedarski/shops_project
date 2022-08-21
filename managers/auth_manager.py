@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import jwt
 from decouple import config
+from flask import g, request
 from flask_httpauth import HTTPTokenAuth
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from werkzeug.exceptions import Unauthorized
@@ -29,7 +30,25 @@ class AuthManager:
             raise Unauthorized("Invalid token")
 
 
-auth = HTTPTokenAuth()
+class Auth(HTTPTokenAuth):
+    @staticmethod
+    def login_optional(func):
+        """Create current_user if there is request is authenticated"""
+
+        def wrapper(*args, **kwargs):
+            token = request.headers.get('Authorization')
+            if token:
+                user_id, user_role = AuthManager.decode_token(token[7:]).values()
+                model = get_user_or_admin_model(user_role)
+                user = model.query.filter_by(id=user_id).first()
+                g.flask_httpauth_user = user
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+
+auth = Auth()
 
 
 @auth.verify_token
