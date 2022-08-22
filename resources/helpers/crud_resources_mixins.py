@@ -47,15 +47,35 @@ class GetResourceMixin(ABC, BaseResource):
         return self.get_schema_out(pk=pk)().dump(instance), 200
 
 
+class GetListResourceMixin(ABC, BaseResource):
+    """Minimum required class attributes: MODEL, SCHEMA_OUT"""
+
+    @abstractmethod
+    def get(self):
+        obj_list = CRUDManager.get_all(self.get_model(), self.filter_by())
+        return [self.get_schema_out()().dump(instance) for instance in obj_list if instance], 200
+
+    def filter_by(self):
+        return None
+
+
 class EditResourceMixin(ABC, BaseResource):
     """Minimum required class attributes: MODEL, SCHEMA_OUT"""
 
     @abstractmethod
     def put(self, pk):
-        p = 1
         data = self.get_data()
         instance = CRUDManager.edit(self.get_model(), data, pk)
         return self.get_schema_out(pk=pk)().dump(instance), 200
+
+
+class DeleteResourceMixin(ABC, BaseResource):
+    """Minimum required class attributes: MODEL"""
+
+    @abstractmethod
+    def delete(self, pk):
+        CRUDManager.delete(self.get_model(), pk)
+        return None, 204
 
 
 class DeleteImageResourceMixin(ABC, BaseResource):

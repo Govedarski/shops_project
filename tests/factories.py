@@ -14,13 +14,14 @@ class BaseFactory(factory.Factory):
 
 
 class BaseUserFactory(BaseFactory):
-    id = factory.Sequence(lambda n: n + 100)
     username = factory.Faker('user_name')
     email = factory.Faker("email")
     password = factory.Faker("password")
 
 
 class CustomerFactory(BaseUserFactory):
+    id = factory.Sequence(lambda n: n + 100)
+
     class Meta:
         model = CustomerModel
 
@@ -28,6 +29,8 @@ class CustomerFactory(BaseUserFactory):
 
 
 class OwnerFactory(BaseUserFactory):
+    id = factory.Sequence(lambda n: n + 100)
+
     class Meta:
         model = ShopOwnerModel
 
@@ -35,7 +38,7 @@ class OwnerFactory(BaseUserFactory):
 
 
 class AdminFactory(BaseUserFactory):
-    id = factory.Sequence(lambda n: n + 10000)
+    id = factory.Sequence(lambda n: n + 1000)
 
     class Meta:
         model = AdminModel
@@ -44,6 +47,8 @@ class AdminFactory(BaseUserFactory):
 
 
 class SuperAdminFactory(BaseUserFactory):
+    id = factory.Sequence(lambda n: n + 10000)
+
     class Meta:
         model = AdminModel
 

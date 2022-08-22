@@ -2,12 +2,13 @@ from werkzeug.security import generate_password_hash
 
 from db import db
 from managers.auth_manager import AuthManager
+from managers.user_manager import UserManager
 from models import CustomerModel, ShopOwnerModel, AdminModel
 from resources.helpers.access_endpoint_validators import ValidateRole
 from schemas.validators.common_validators import ValidateIsAlphaNumeric
 from tests import helpers as test_helpers
 from tests.base_test_case import BaseTestCase
-from tests.factories import SuperAdminFactory, AdminFactory
+from tests.factories import SuperAdminFactory, AdminFactory, CustomerFactory, OwnerFactory
 from tests.helpers import generate_token
 from utils import helpers
 
@@ -74,18 +75,6 @@ class TestUserRegistration(BaseTestCase):
 
 class TestAdminRegistration(BaseTestCase):
     URL = "/admin/register"
-    VAlID_CUSTOMER_CREDENTIALS = {
-        "username": "test",
-        "email": "test@test.com",
-        "password": "testP@ss1!",
-    }
-    VAlID_OWNER_CREDENTIALS = {
-        "username": "tester",
-        "email": "tester@test.com",
-        "password": "testP@ss1!",
-    }
-    VALID_CUSTOMER_DATA = {"role": "customer"}
-    VALID_OWNER_DATA = {"role": "owner"}
 
     def setUp(self):
         super().setUp()
@@ -93,63 +82,49 @@ class TestAdminRegistration(BaseTestCase):
         token = generate_token(self._super_admin)
         self._AUTHORIZATION_HEADER = {"Authorization": f"Bearer {token}"}
         self._HEADERS = self._AUTHORIZATION_HEADER | self._HEADER_CONT_TYPE_JSON
-        self.customer = self._create_user_in_test_db("customer", self.VAlID_CUSTOMER_CREDENTIALS)
-        self.owner = self._create_user_in_test_db("owner", self.VAlID_OWNER_CREDENTIALS)
-
-    @staticmethod
-    def _create_user_in_test_db(role, credentials):
-        data = {**credentials, "role": role}
-        data["password"] = generate_password_hash(data["password"])
-        user_model = helpers.get_user_or_admin_model(role)
-        user = user_model(**data)
-        db.session.add(user)
-        db.session.commit()
-        return user
+        self._customer = CustomerFactory()
+        self._owner = OwnerFactory()
+        self.VALID_CUSTOMER_DATA = {"role": self._customer.role.name, "id": self._customer.id}
+        self.VALID_OWNER_DATA = {"role": self._owner.role.name, "id": self._owner.id}
 
     def test_create_admin_with_valid_user_expect_204(self):
         test_helpers.assert_count_equal(1, AdminModel)
 
-        customer_url = self.URL + "/" + str(self.customer.id)
-        resp = self.client.post(customer_url, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
         self.assertEqual(204, resp.status_code)
         test_helpers.assert_count_equal(2, AdminModel)
 
-        owner_url = self.URL + "/" + str(self.owner.id)
-        resp = self.client.post(owner_url, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
         self.assertEqual(204, resp.status_code)
         test_helpers.assert_count_equal(3, AdminModel)
 
     def test_create_admin_with_duplicate_user_expect_400(self):
         test_helpers.assert_count_equal(1, AdminModel)
 
-        customer_url = self.URL + "/" + str(self.customer.id)
-        self.client.post(customer_url, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
-        resp = self.client.post(customer_url, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
+        self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
         self.assertEqual(400, resp.status_code)
-        self.assertIn("Unique constraint violation!", resp.json["message"])
+        self.assertIn(UserManager.UNIQUE_VALIDATION_MESSAGE, resp.json["message"])
         test_helpers.assert_count_equal(2, AdminModel)
 
-        owner_url = self.URL + "/" + str(self.owner.id)
-        self.client.post(customer_url, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
-        resp = self.client.post(customer_url, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
+        self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
+        resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
         self.assertEqual(400, resp.status_code)
-        self.assertIn("Unique constraint violation!", resp.json["message"])
+        self.assertIn(UserManager.UNIQUE_VALIDATION_MESSAGE, resp.json["message"])
         test_helpers.assert_count_equal(3, AdminModel)
-
-    def test_create_admin_not_existing_user_expect_404_and_correct_message(self):
-        customer_url = self.URL + "/" + str(self.customer.id + 1)
-        self.client.post(customer_url, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
-        resp = self.client.post(customer_url, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
-        self.assertEqual(404, resp.status_code)
-        self.assertIn("Page not found!", resp.json["message"])
 
     def test_create_admin_from_not_super_admin_data_expect_403_and_correct_message(self):
         admin = AdminFactory()
         token = generate_token(admin)
         headers = {"Authorization": f"Bearer {token}"} | self._HEADER_CONT_TYPE_JSON
 
-        customer_url = self.URL + "/" + str(self.customer.id)
-        resp = self.client.post(customer_url, headers=headers, json=self.VALID_CUSTOMER_DATA)
+        resp = self.client.post(self.URL, headers=headers, json=self.VALID_CUSTOMER_DATA)
+
+        self.assertEqual(403, resp.status_code)
+        self.assertIn(ValidateRole.ERROR_MESSAGE, resp.json["message"])
+
+        resp = self.client.post(self.URL, headers=headers, json=self.VALID_OWNER_DATA)
+
         self.assertEqual(403, resp.status_code)
         self.assertIn(ValidateRole.ERROR_MESSAGE, resp.json["message"])
 

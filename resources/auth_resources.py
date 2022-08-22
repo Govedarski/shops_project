@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash
 from managers.auth_manager import auth
 from managers.user_manager import UserManager
 from models import AdminRoles, AdminModel
-from resources.helpers.access_endpoint_validators import ValidateSchema, ValidateRole, ValidatePageExist
+from resources.helpers.access_endpoint_validators import ValidateSchema, ValidateRole
 from resources.helpers.crud_resources_mixins import BaseResource
 from schemas.request.authentication_schemas_in import RegisterSchemaIn, RegisterAdminSchemaIn
 from utils import helpers
@@ -36,19 +36,17 @@ class RegisterAdminResource(BaseResource):
 
     @auth.login_required
     @execute_access_validators(
-        ValidatePageExist(),
         ValidateRole(),
         ValidateSchema()
     )
-    def post(self, pk):
-        user_model = self.get_model()
-        user = user_model.query.filter_by(id=pk).first()
-        data = self._get_admin_data(user)
-        UserManager.register(AdminModel, data)
-        return {}, 204
+    def post(self):
+        data = self.get_data()
+        user_model = helpers.get_user_model(data['role'])
 
-    def get_model(self):
-        return helpers.get_user_model(self.get_data()['role'])
+        user = user_model.query.filter_by(id=data["id"]).first()
+        admin_data = self._get_admin_data(user)
+        UserManager.register(AdminModel, admin_data)
+        return {}, 204
 
     @staticmethod
     def _get_admin_data(user):

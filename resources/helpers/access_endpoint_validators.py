@@ -45,11 +45,13 @@ class ValidateRole(BaseAccessValidator):
         current_user = auth.current_user()
         if not current_user:
             return
+        if current_user.role == AdminRoles.super_admin:
+            return
         if current_user.role not in allowed_roles:
             raise Forbidden(self._get_error_message(instance))
 
 
-class ValidateIsOwner(BaseAccessValidator):
+class ValidateIsHolder(BaseAccessValidator):
     ERROR_MESSAGE = "Permission denied!"
     CLASS_ERROR_MESSAGE_FIELD_NAME = "OWNER_REQUIRED_MESSAGE"
 
@@ -59,7 +61,10 @@ class ValidateIsOwner(BaseAccessValidator):
             return
 
         pk = kwargs.get('pk')
-        is_holder = instance.get_model().query.filter_by(id=pk).first().holder_id == current_user.id
+        is_holder = False
+        obj = instance.get_model().query.filter_by(id=pk).first()
+        if obj:
+            is_holder = obj.holder_id == current_user.id
 
         if not is_holder:
             raise Forbidden(self._get_error_message(instance))

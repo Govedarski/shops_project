@@ -26,4 +26,5 @@ class RegisterSchemaIn(Schema):
 
 
 class RegisterAdminSchemaIn(Schema):
+    id = fields.Integer(required=True)
     role = EnumField(UserRoles, required=True, error_messages={'by_name': "Invalid role"})

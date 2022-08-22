@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from db import db
 from models import ShopOwnerModel, ShopOwnerDetailsModel
-from resources.details_resources import ShopOwnerDetailsResource
+from resources.details_resources.shop_owner_details_resources import ShopOwnerDetailsResource
 from resources.helpers.access_endpoint_validators import ValidateUniqueness
 from services.s3 import s3
 from tests import helpers

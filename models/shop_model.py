@@ -25,7 +25,7 @@ class ShopModel(db.Model, ImageMixin):
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
     confirm_documents_image_url = db.Column(db.String(255), nullable=False)
-    confirm = db.Column(db.Boolean, nullable=False, default=False)
+    verified = db.Column(db.Boolean, nullable=False, default=False)
 
     registered_on = db.Column(db.DateTime, server_default=func.now(), nullable=False)
     last_changed = db.Column(db.DateTime, onupdate=func.now())

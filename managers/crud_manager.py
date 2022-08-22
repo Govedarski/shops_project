@@ -25,6 +25,12 @@ class CRUDManager:
     def get(model, pk):
         return model.query.filter_by(id=pk).first()
 
+    @staticmethod
+    def get_all(model, filter_by):
+        if filter_by:
+            return model.query.filter_by(**filter_by).all()
+        return model.query.all()
+
     @classmethod
     def edit(cls, model, data, pk):
         instance = cls.get(model, pk)
@@ -33,6 +39,15 @@ class CRUDManager:
             return instance
 
         return cls._processed_with_photos(model, data, instance)
+
+    @classmethod
+    def delete(cls, model, pk):
+        instance = cls.get(model, pk)
+        if not hasattr(model, "get_all_image_field_names"):
+            model.query.filter_by(id=instance.id).delete()
+            return None
+
+        return cls._delete_with_photos(model, instance)
 
     @classmethod
     def delete_image(cls, model, pk, image_field_name):
@@ -90,8 +105,20 @@ class CRUDManager:
             instance = cls._create_in_db(model, data)
             return instance
 
-        except Exception as ex:
-            p = ex
+        except Exception:
             [s3.delete_photo(photo_name) for photo_name in photo_names]
         finally:
             [os.remove(path) for path in paths]
+
+    @classmethod
+    def _delete_with_photos(cls, model, instance):
+        image_field_names = model.get_all_image_field_names()
+        photo_to_delete = []
+
+        for image_field_name in image_field_names:
+            photo_name = get_photo_name_by_url(getattr(instance, image_field_name + IMAGE_SUFFIX_IN_DB))
+            photo_to_delete.append(photo_name)
+
+        model.query.filter_by(id=instance.id).delete()
+        [s3.delete_photo(photo) for photo in photo_to_delete if photo]
+
