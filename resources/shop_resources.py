@@ -1,18 +1,39 @@
 from flask import request
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import Forbidden
 
 from managers.auth_manager import auth
+from managers.crud_manager import CRUDManager
+from managers.shop_manager import ShopManager
 from models import ShopModel, UserRoles, AdminRoles
 from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema, ValidateIsHolder, \
     ValidatePageExist
-from resources.helpers.crud_resources_mixins import CreateResourceMixin, GetListResourceMixin, \
-    GetResourceMixin, EditResourceMixin, DeleteImageResourceMixin
+from resources.helpers.crud_resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
+    DeleteImageResourceMixin, GetListResourceMixin
 from schemas.request.shop_schema_in import ShopCreateSchemaIn, ShopEditSchemaIn
 from schemas.response.shop_schemas_out import ShopExtendedSchemaOut, ShopShortSchemaOut
 from utils.resource_decorators import execute_access_validators
 
 
-class ShopResource(CreateResourceMixin, GetListResourceMixin):
+class ShopGetResourceMixin:
+    def get_schema_out(self, **kwargs):
+        """Shop all info to his holder and admins else short info"""
+        instance = kwargs.get('instance')
+        if self.is_current_user_admin() or self.is_current_user_holder(instance):
+            return ShopExtendedSchemaOut
+        return ShopShortSchemaOut
+
+    @staticmethod
+    def is_current_user_admin():
+        user = auth.current_user()
+        return user and user.role in AdminRoles
+
+    @staticmethod
+    def is_current_user_holder(instance):
+        user = auth.current_user()
+        return user and user.role != UserRoles.customer and user.id == instance.holder_id
+
+
+class ShopResource(ShopGetResourceMixin, CreateResourceMixin, GetListResourceMixin):
     MODEL = ShopModel
     SCHEMA_IN = ShopCreateSchemaIn
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
@@ -27,41 +48,34 @@ class ShopResource(CreateResourceMixin, GetListResourceMixin):
 
     @auth.login_optional
     def get(self):
-        return super().get()
+        user = auth.current_user()
+        return super().get(user=user)
 
     def filter_by(self):
-        # show not active shops only to admins and their owners
         criteria = {}
         if request.query_string:
             queries = request.query_string.decode("utf-8").split("&")
             criteria = {field: criteria for field, criteria in [query.split("=") for query in queries]}
 
-        current_user = auth.current_user()
-        if not current_user or current_user.role == UserRoles.customer:
-            return criteria | {"active": True}
+        return criteria
 
-        if current_user.role in AdminRoles or current_user.id == criteria.get("holder_id"):
-            return criteria
-
-        return criteria | {"active": True}
-
-    def get_schema_out(self, *args, **kwargs):
-        current_user = auth.current_user()
-        instance = kwargs.get('instance')
-        if current_user and (current_user.role in AdminRoles or current_user.id == instance.holder_id):
-            return ShopExtendedSchemaOut
-
-        return ShopShortSchemaOut
+    def get_manager(self):
+        if request.method == "GET":
+            return ShopManager
+        return super().get_manager()
 
 
-class ShopSingleResource(GetResourceMixin, EditResourceMixin):
+class ShopSingleResource(ShopGetResourceMixin, GetResourceMixin, EditResourceMixin):
     MODEL = ShopModel
     SCHEMA_IN = ShopEditSchemaIn
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
     @auth.login_optional
     def get(self, pk):
-        return super().get(pk)
+        shop = CRUDManager.get(self.get_model(), pk)
+        if shop.active or self.is_current_user_admin() or self.is_current_user_holder(shop):
+            return self.get_schema_out(instance=shop)().dump(shop), 200
+        raise Forbidden("Permission denied!")
 
     @auth.login_required
     @execute_access_validators(
@@ -73,19 +87,7 @@ class ShopSingleResource(GetResourceMixin, EditResourceMixin):
     def put(self, pk):
         return super().put(pk)
 
-    def get_schema_out(self, *args, **kwargs):
-        # show not active shops only to admins and their owners
-        current_user = auth.current_user()
-        instance = kwargs.get('instance')
-
-        if current_user \
-                and current_user.role != UserRoles.customer \
-                and (current_user.role in AdminRoles or current_user.id == instance.holder_id):
-            return ShopExtendedSchemaOut
-
-        return ShopShortSchemaOut if instance.active else NotFound("Shop not found!")
-
 
 class ShopBrandPictureResource(DeleteImageResourceMixin):
     def delete(self, pk):
-        pass
+        return super().delete()

@@ -214,4 +214,49 @@ class TestApp(BaseTestCase):
         self.assertEqual(200, resp.status_code)
         self._test_schema_out(resp.json, extended=False)
 
-    # TODO test for edit and get not active shops
+    def test_get_single_shop_with_no_auth_user_and_inactive_shop_expect_403(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id)
+        url = self.URL + "/" + str(shop.id)
+
+        resp = self.client.get(url)
+        self.assertEqual(403, resp.status_code)
+
+    def test_get_with_holder_and_inactive_shop_expect_200_and_list_of_all_shops(self):
+        [self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id) for _ in range(4)]
+        resp = self.client.get(self.URL, headers=self._AUTHORIZATION_HEADER)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(4, len(resp.json))
+
+    def test_get_with_admin_and_inactive_shop_expect_200_and_list_of_all_shops(self):
+        [self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id) for _ in range(4)]
+        [self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id) for _ in range(3)]
+        second_shop_owner = OwnerFactory()
+        [self._create_in_db(ShopModel, self._get_create_data(active=False), second_shop_owner.id) for _ in range(5)]
+        [self._create_in_db(ShopModel, self._get_create_data(active=True), second_shop_owner.id) for _ in range(6)]
+        resp = self.client.get(self.URL, headers=self._create_authorization_header(AdminFactory))
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(18, len(resp.json))
+
+    def test_get_with_no_auth_user_and_inactive_shop_expect_200_and_empty_list(self):
+        [self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id) for _ in range(4)]
+        [self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id) for _ in range(3)]
+        second_shop_owner = OwnerFactory()
+        [self._create_in_db(ShopModel, self._get_create_data(active=False), second_shop_owner.id) for _ in range(5)]
+        [self._create_in_db(ShopModel, self._get_create_data(active=True), second_shop_owner.id) for _ in range(6)]
+        resp = self.client.get(self.URL)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(9, len(resp.json))
+
+    def test_get_with_no_holder_of_part_of_shops_and_inactive_shops_expect_200_and_filter_list_of_shops(self):
+        [self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id) for _ in range(4)]
+        [self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id) for _ in range(3)]
+        second_shop_owner = OwnerFactory()
+        [self._create_in_db(ShopModel, self._get_create_data(active=False), second_shop_owner.id) for _ in range(5)]
+        [self._create_in_db(ShopModel, self._get_create_data(active=True), second_shop_owner.id) for _ in range(6)]
+
+        resp = self.client.get(self.URL, headers=self._AUTHORIZATION_HEADER)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(13, len(resp.json))
+
+
+    

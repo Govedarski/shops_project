@@ -12,7 +12,7 @@ from utils.helpers import save_file, create_photo_from_json, has_photo, get_phot
 
 class CRUDManager:
     @classmethod
-    def create(cls, model, data, user):
+    def create(cls, model, data, user, **kwargs):
         data["holder_id"] = None
         if hasattr(model, "holder_id") and (not model.holder_id.nullable or user):
             data["holder_id"] = user.id
@@ -23,11 +23,11 @@ class CRUDManager:
         return cls._processed_with_photos(model, data)
 
     @staticmethod
-    def get(model, pk):
+    def get(model, pk, **kwargs):
         return model.query.filter_by(id=pk).first()
 
     @staticmethod
-    def get_all(model, filter_by):
+    def get_list(model, filter_by, **kwargs):
         if filter_by:
             try:
                 return model.query.filter_by(**filter_by).all()
@@ -37,7 +37,7 @@ class CRUDManager:
         return model.query.all()
 
     @classmethod
-    def edit(cls, model, data, pk):
+    def edit(cls, model, data, pk, **kwargs):
         instance = cls.get(model, pk)
         if not hasattr(model, "get_all_image_field_names"):
             model.query.filter_by(id=instance.id).update(data)
@@ -46,7 +46,7 @@ class CRUDManager:
         return cls._processed_with_photos(model, data, instance)
 
     @classmethod
-    def delete(cls, model, pk):
+    def delete(cls, model, pk, **kwargs):
         instance = cls.get(model, pk)
         if not hasattr(model, "get_all_image_field_names"):
             model.query.filter_by(id=instance.id).delete()
@@ -55,7 +55,7 @@ class CRUDManager:
         return cls._delete_with_photos(model, instance)
 
     @classmethod
-    def delete_image(cls, model, pk, image_field_name):
+    def delete_image(cls, model, pk, image_field_name, **kwargs):
         instance = cls.get(model, pk)
         image_field_name_with_suffix = image_field_name + IMAGE_SUFFIX_IN_DB
         photo = get_photo_name_by_url(getattr(instance, image_field_name_with_suffix))
@@ -116,7 +116,7 @@ class CRUDManager:
             [os.remove(path) for path in paths]
 
     @classmethod
-    def _delete_with_photos(cls, model, instance):
+    def _delete_with_photos(cls, model, instance, **kwargs):
         image_field_names = model.get_all_image_field_names()
         photo_to_delete = []
 
