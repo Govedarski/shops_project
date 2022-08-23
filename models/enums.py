@@ -26,3 +26,4 @@ class ProductCategories(Enum):
     toys = "Toys and baby products"
     gardens = "Garden"
     pets = "Pets"
+

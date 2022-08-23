@@ -2,7 +2,6 @@ from constants.Image_suffix import IMAGE_SUFFIX_IN_DB
 
 
 class ImageMixin:
-    IMAGE_SUFFIX = ""
     """Mixin for all models which has image_url fields in themselves"""
 
     @classmethod

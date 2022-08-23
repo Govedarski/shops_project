@@ -28,6 +28,7 @@ class DevelopmentConfiguration:
 
 
 class TestingConfiguration:
+    FLASK_ENV = "TestConfiguration"
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = (
@@ -36,6 +37,9 @@ class TestingConfiguration:
 
 
 def create_app(configuration=None):
+    # In development .env CONFIGURATION=config.DevelopmentConfiguration
+    # In production .env CONFIGURATION=config.ProductionConfiguration
+    # In test create_app param = config.TestingConfiguration
     app = Flask(__name__)
     configuration = configuration if configuration else config("CONFIGURATION")
     app.config.from_object(configuration)

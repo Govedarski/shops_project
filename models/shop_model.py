@@ -2,6 +2,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Query
 
 from db import db
+from models.association_tables import shops_products
 from models.mixins import ImageMixin
 
 
@@ -31,3 +32,7 @@ class ShopModel(db.Model, ImageMixin):
     last_changed = db.Column(db.DateTime, onupdate=func.now())
 
     holder_id = db.Column(db.Integer, db.ForeignKey("shop_owner.id"), nullable=False)
+
+    products = db.relationship(
+        "ProductModel", secondary=shops_products, backref="in_shops"
+    )

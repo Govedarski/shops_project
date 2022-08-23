@@ -15,6 +15,7 @@ routes = (
 
     # ("pass", "/customer/<:id>"),
     # ("pass", "/owner/<:id>"),
+    # (pass, "/shop/<int:pk>/products"),
     # TODO: get with all related details_schemas_in delete with all related details_schemas_in if no order linked to it
 
     (CreateCustomerDetailsResource, "/customer/details"),  # POST
@@ -35,5 +36,8 @@ routes = (
     (DeactivateShopResource, "/shop/<int:pk>/deactivate"),  # PUT
     (BrandLogoResource, "/shop/<int:pk>/brand_logo"),  # DELETE
 
-    # TODO deactivate shop and product model
+    # (ShopResource, "/product"),  # POST - list of products, GET
+    # (ShopSingleResource, "/product/<int:pk>"),  # GET, PUT, DELETE
+    # (VerifyShopResource, "/product/<int:pk>/listed"),  # PUT
+    # (ProductPhotoResource, "/product/<int:pk>/photo"),  # DELETE
 )
