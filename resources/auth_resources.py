@@ -4,7 +4,7 @@ from managers.auth_manager import auth
 from managers.user_manager import UserManager
 from models import AdminRoles, AdminModel
 from resources.helpers.access_endpoint_validators import ValidateSchema, ValidateRole
-from resources.helpers.crud_resources_mixins import BaseResource
+from resources.helpers.resources_mixins import BaseResource
 from schemas.request.authentication_schemas_in import RegisterSchemaIn, RegisterAdminSchemaIn
 from utils import helpers
 from utils.resource_decorators import execute_access_validators

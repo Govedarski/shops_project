@@ -22,6 +22,8 @@ class ShopOwnerDetailsSchemaOut(DetailsSchemaOut):
 
     confirm_identity_documents_image_url = fields.String(required=True)
 
+    verified = fields.Boolean(required=True)
+
 
 class DeliveryAddressDetailsSchemaOut(Schema):
     id = fields.Integer(required=True)

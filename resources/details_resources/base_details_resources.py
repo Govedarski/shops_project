@@ -1,8 +1,7 @@
 from managers.auth_manager import auth
 from resources.helpers.access_endpoint_validators import ValidateRole, ValidateUniqueness, ValidateSchema, \
     ValidatePageExist, ValidateIsHolder
-from resources.helpers.crud_resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
-    DeleteImageResourceMixin
+from resources.helpers.resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin
 from utils.resource_decorators import execute_access_validators
 
 
@@ -34,17 +33,6 @@ class DetailsResource(GetResourceMixin, EditResourceMixin):
     )
     def put(self, pk):
         return super().put(pk)
-
-
-class DetailsImageResource(DeleteImageResourceMixin):
-    @auth.login_required
-    @execute_access_validators(
-        ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
-    )
-    def delete(self, pk):
-        return super().delete(pk)
 
 
 class RemoveIbanSpacesMixin:

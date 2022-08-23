@@ -1,11 +1,11 @@
 from resources.auth_resources import RegisterResource, LoginResource, RegisterAdminResource
 from resources.details_resources.customer_details_resources import CreateCustomerDetailsResource, \
     CustomerDetailsResource, CustomerProfilePictureResource
-from resources.details_resources.delivery_address_resources import VerifyShopOwnerDetailsResource, \
+from resources.details_resources.delivery_address_resources import \
     DeliveryAddressDetailsResource, DeliveryAddressDetailsSingleResource
 from resources.details_resources.shop_owner_details_resources import CreateShopOwnerDetailsResource, \
-    ShopOwnerDetailsResource, ShopOwnerProfilePictureResource
-from resources.shop_resources import ShopResource, ShopSingleResource
+    ShopOwnerDetailsResource, ShopOwnerProfilePictureResource, VerifyShopOwnerDetailsResource
+from resources.shop_resources import ShopResource, ShopSingleResource, VerifyShopResource, BrandLogoResource
 
 routes = (
     (RegisterResource, "/register"),  # POST
@@ -30,10 +30,8 @@ routes = (
 
     (ShopResource, "/shop"),  # POST, GET
     (ShopSingleResource, "/shop/<int:pk>"),  # GET, PUT
+    (VerifyShopResource, "/shop/<int:pk>/verify"),  # PUT
+    (BrandLogoResource, "/shop/<int:pk>/brand_logo"),  # DELETE
 
-    # # TODO
-    # (VerifyShopOwnerDetailsResource, "/shop/<int:pk>/verify"),  # PUT
-    # (VerifyShopOwnerDetailsResource, "/shop/<int:pk>/deactivate"),  # PUT
-    # (ShopBrandPictureResource, "/shop/details_schemas_in/<int:pk>/profile_picture"),  # DELETE
-
+    # TODO deactivate shop and product model
 )

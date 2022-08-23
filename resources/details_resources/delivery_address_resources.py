@@ -1,36 +1,16 @@
 from managers.auth_manager import auth
 from managers.crud_manager import CRUDManager
-from models import ShopOwnerDetailsModel, AdminRoles, DeliveryAddressDetailsModel, UserRoles, CustomerDetailsModel
+from models import AdminRoles, DeliveryAddressDetailsModel, UserRoles, CustomerDetailsModel
 from resources.details_resources.base_details_resources import DetailsResource
 from resources.helpers.access_endpoint_validators import ValidatePageExist, ValidateRole, ValidateSchema, \
     ValidateIsHolder
-from resources.helpers.crud_resources_mixins import EditResourceMixin, CreateResourceMixin, GetListResourceMixin, \
+from resources.helpers.resources_mixins import CreateResourceMixin, GetListResourceMixin, \
     DeleteResourceMixin
 from schemas.request.details_schemas_in.delivery_address_details_schemas_in import \
     AuthCreateDeliveryAddressDetailsSchemaIn, NoAuthCreateDeliveryAddressDetailsSchemaIn, \
     EditDeliveryAddressDetailsSchemaIn
-from schemas.response.details_schemas_out import ShopOwnerDetailsSchemaOut, DeliveryAddressDetailsSchemaOut
+from schemas.response.details_schemas_out import DeliveryAddressDetailsSchemaOut
 from utils.resource_decorators import execute_access_validators
-
-
-class VerifyShopOwnerDetailsResource(EditResourceMixin):
-    MODEL = ShopOwnerDetailsModel
-    SCHEMA_OUT = ShopOwnerDetailsSchemaOut
-    ALLOWED_ROLES = [AdminRoles.admin, AdminRoles.super_admin]
-
-    @auth.login_required
-    @execute_access_validators(
-        ValidateRole(),
-        ValidatePageExist(),
-    )
-    def put(self, pk):
-        result = super().put(pk)
-        if result[1] == 200:
-            return {"verified": True}, 200
-        return result
-
-    def get_data(self):
-        return {"verified": True}
 
 
 class DeliveryAddressDetailsResource(CreateResourceMixin, GetListResourceMixin):

@@ -1,7 +1,8 @@
 from managers.auth_manager import auth
 from models import ShopOwnerDetailsModel, UserRoles, AdminRoles
 from resources.details_resources.base_details_resources import CreateDetailsResource, DetailsResource, \
-    DetailsImageResource, RemoveIbanSpacesMixin
+    RemoveIbanSpacesMixin
+from resources.helpers.base_resources import VerifyBaseResource, RemoveImageBaseResource
 from schemas.request.details_schemas_in.shop_owner_details_schemas_in import CreateShopOwnerDetailsSchemaIn, \
     EditShopOwnerDetailsSchemaIn
 from schemas.response.details_schemas_out import ShopOwnerDetailsSchemaOut, DetailsSchemaOut
@@ -32,9 +33,15 @@ class ShopOwnerDetailsResource(RemoveIbanSpacesMixin, DetailsResource):
         return DetailsSchemaOut
 
 
-class ShopOwnerProfilePictureResource(DetailsImageResource):
+class ShopOwnerProfilePictureResource(RemoveImageBaseResource):
     MODEL = ShopOwnerDetailsModel
     SCHEMA_OUT = DetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
     IMAGE_FIELD_NAME = "profile_picture"
     NOT_FOUND_MESSAGE = "Shop owner details_schemas_in not found!"
+
+
+class VerifyShopOwnerDetailsResource(VerifyBaseResource):
+    MODEL = ShopOwnerDetailsModel
+    SCHEMA_OUT = ShopOwnerDetailsSchemaOut
+    ALLOWED_ROLES = [AdminRoles.admin, AdminRoles.super_admin]

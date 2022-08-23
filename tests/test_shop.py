@@ -326,3 +326,34 @@ class TestApp(BaseTestCase):
         self.assertEqual(200, resp.status_code)
         self.assertEqual(mocked_s3.return_value, resp.json["brand_logo_image_url"])
         self.assertEqual(mocked_s3.return_value, shop.brand_logo_image_url)
+
+    @patch.object(s3, "delete_photo", return_value=None)
+    def test_delete_existing_brand_logo_picture_expect_status_200_db_updated_correct_json(self, _):
+        data = self._get_create_data(active=True) | {"brand_logo_image_url": "some.url"}
+
+        shop = self._create_in_db(ShopModel, data, self._shop_owner.id)
+        url = self.URL + "/" + str(shop.id) + "/brand_logo"
+
+        resp = self.client.delete(url, headers=self._AUTHORIZATION_HEADER)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(None, resp.json["brand_logo_image_url"])
+
+    def test_delete_not_existing_profile_picture_expect_status_404_and_correct_message(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
+        url = self.URL + "/" + str(shop.id) + "/brand_logo"
+        resp = self.client.delete(url, headers=self._AUTHORIZATION_HEADER)
+        self.assertEqual(404, resp.status_code)
+
+    def test_verify_information_admin_user_expect_200_and_change_in_db(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
+
+        url = self.URL + "/" + str(shop.id) + "/verify"
+
+        resp = self.client.put(url, headers=self._create_authorization_header(AdminFactory))
+
+        self.assertEqual(200, resp.status_code)
+        self.assertTrue(resp.json["verified"])
+        self.assertTrue(resp.json["active"])
+        self.assertTrue(shop.verified)
+        self.assertTrue(shop.active)

@@ -14,6 +14,6 @@ class ShopExtendedSchemaOut(ShopShortSchemaOut):
     address = fields.Str(required=True)
     phone_number = fields.Str()
     verifying_documents_image_url = fields.String(required=True)
-    verified = fields.Boolean()
-    active = fields.Boolean()
+    verified = fields.Boolean(required=True)
+    active = fields.Boolean(required=True)
     holder_id = fields.Integer(required=True)

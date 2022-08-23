@@ -23,6 +23,8 @@ class TestApp(BaseTestCase):
         ("delivery_address_details/1", "delete"),
         ("shop", "post"),
         ("shop/1", "put"),
+        ("shop/1/verify", "put"),
+        ("/shop/1/brand_logo", "delete"),
 
     )
 
@@ -91,7 +93,8 @@ class TestApp(BaseTestCase):
             ("/shop_owner/details/1/profile_picture", "delete"),
             ("/shop", "post"),
             ("shop/1", "put"),
-
+            ("/shop/1/verify", "put"),
+            ("/shop/1/brand_logo", "delete"),
         )
         user = CustomerFactory()
 
@@ -113,6 +116,9 @@ class TestApp(BaseTestCase):
             ("/delivery_address_details/1", "put"),
             ("/delivery_address_details/1", "get"),
             ("/delivery_address_details/1", "delete"),
+            ("/shop_owner/details/1/verify", "put"),
+            ("/shop/1/verify", "put"),
+
         )
         user = OwnerFactory()
 
@@ -146,6 +152,9 @@ class TestApp(BaseTestCase):
         endpoints = (
             ("/shop_owner/details/1", "put"),
             ("/shop_owner/details/1/profile_picture", "delete"),
+            ("shop/1", "put"),
+            ("/shop/1/brand_logo", "delete"),
+
         )
         user = OwnerFactory()
 

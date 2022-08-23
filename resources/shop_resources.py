@@ -7,8 +7,9 @@ from managers.shop_manager import ShopManager
 from models import ShopModel, UserRoles, AdminRoles
 from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema, ValidateIsHolder, \
     ValidatePageExist
-from resources.helpers.crud_resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
-    DeleteImageResourceMixin, GetListResourceMixin
+from resources.helpers.base_resources import VerifyBaseResource, RemoveImageBaseResource
+from resources.helpers.resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
+    GetListResourceMixin
 from schemas.request.shop_schema_in import ShopCreateSchemaIn, ShopVerifiedEditSchemaIn, ShopNotVerifiedEditSchemaIn
 from schemas.response.shop_schemas_out import ShopExtendedSchemaOut, ShopShortSchemaOut
 from utils.resource_decorators import execute_access_validators
@@ -92,6 +93,18 @@ class ShopSingleResource(ShopGetResourceMixin, GetResourceMixin, EditResourceMix
         return ShopVerifiedEditSchemaIn if self.get_object(pk).verified else ShopNotVerifiedEditSchemaIn
 
 
-class ShopBrandPictureResource(DeleteImageResourceMixin):
-    def delete(self, pk):
-        return super().delete()
+class BrandLogoResource(RemoveImageBaseResource):
+    MODEL = ShopModel
+    SCHEMA_OUT = ShopExtendedSchemaOut
+    ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
+    IMAGE_FIELD_NAME = "brand_logo"
+
+
+class VerifyShopResource(VerifyBaseResource):
+    MODEL = ShopModel
+    SCHEMA_OUT = ShopExtendedSchemaOut
+    ALLOWED_ROLES = [AdminRoles.admin, AdminRoles.super_admin]
+
+    def get_data(self):
+        data = super().get_data()
+        return data | {"active": True}
