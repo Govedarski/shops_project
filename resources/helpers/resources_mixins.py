@@ -9,10 +9,10 @@ from managers.crud_manager import CRUDManager
 
 class BaseResource(Resource):
     # Extended Resource class
+    MANAGER = CRUDManager
     MODEL = None
     SCHEMA_IN = None
     SCHEMA_OUT = None
-    MANAGER = CRUDManager
 
     @staticmethod
     def get_data(*args, **kwargs):

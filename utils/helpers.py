@@ -21,6 +21,14 @@ def get_user_or_admin_model(role):
     return get_user_model(role)
 
 
+def is_admin(user):
+    return user and user.role in AdminRoles
+
+
+def is_holder(instance, holder_role, user):
+    return user and user.role == holder_role and user.id == instance.holder_id
+
+
 def get_or_404(model, pk, message=None):
     if not message:
         message = "Page not found!"

@@ -1,11 +1,25 @@
 import itertools
 
 from sqlalchemy.exc import InvalidRequestError
+from werkzeug.exceptions import Forbidden
 
-from models import AdminRoles, UserRoles
+from managers.crud_manager import CRUDManager
+from models import UserRoles
+from utils import helpers
 
 
-class ShopManager:
+class ShopManager(CRUDManager):
+    PERMISSION_DENIED_MESSAGE = "Permission denied!"
+    DELETE_DENIED_MESSAGE = "Cannot delete verified shop!"
+
+    @classmethod
+    def get(cls, model, pk, **kwargs):
+        user = kwargs.get('user')
+        shop = cls._get_instance(model, pk)
+        if helpers.is_admin(user) or helpers.is_holder(shop, UserRoles.owner, user) or shop.active:
+            return shop
+        raise Forbidden(cls.PERMISSION_DENIED_MESSAGE)
+
     @classmethod
     def get_list(cls, model, criteria, **kwargs):
         user = kwargs.get('user')
@@ -15,6 +29,13 @@ class ShopManager:
             # not sure empty list or BadRequest
             return []
 
+    @classmethod
+    def delete(cls, model, pk, **kwargs):
+        shop = cls._get_instance(model, pk)
+        if shop.verified:
+            raise Forbidden(cls.DELETE_DENIED_MESSAGE)
+        return super().delete(model, pk)
+
     @staticmethod
     def _fetch_data(model, criteria, user):
         # if not auth user or customer return shops by criteria which are active
@@ -23,7 +44,7 @@ class ShopManager:
             return model.query.filter_by(**criteria).all()
 
         # if admin return all shops by criteria
-        if user.role in AdminRoles:
+        if helpers.is_admin(user):
             return model.query.filter_by(**criteria).all()
 
         # Here user role is shop_owner
@@ -33,7 +54,7 @@ class ShopManager:
             holder_criteria = criteria | {"holder_id": user.id}
             holder_shops = model.query.filter_by(**holder_criteria).all()
 
-        # if user don't want his own shops fetch the rest shops by criteria which are active
+        # if user do not want his own shops fetch the rest shops by criteria which are active
         foreign_shops = []
         if not criteria.get('holder_id') == user.id:
             foreign_criteria = criteria | {"active": True}

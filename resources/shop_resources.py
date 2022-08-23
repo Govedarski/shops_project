@@ -1,40 +1,32 @@
 from flask import request
-from werkzeug.exceptions import Forbidden
 
 from managers.auth_manager import auth
-from managers.crud_manager import CRUDManager
 from managers.shop_manager import ShopManager
 from models import ShopModel, UserRoles, AdminRoles
 from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema, ValidateIsHolder, \
     ValidatePageExist
 from resources.helpers.base_resources import VerifyBaseResource, RemoveImageBaseResource
 from resources.helpers.resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
-    GetListResourceMixin
+    GetListResourceMixin, DeleteResourceMixin
 from schemas.request.shop_schema_in import ShopCreateSchemaIn, ShopVerifiedEditSchemaIn, ShopNotVerifiedEditSchemaIn
 from schemas.response.shop_schemas_out import ShopExtendedSchemaOut, ShopShortSchemaOut
+from utils import helpers
 from utils.resource_decorators import execute_access_validators
 
 
-class ShopGetResourceMixin:
+class ShopGetSchemaOutMixin:
     def get_schema_out(self, **kwargs):
         """Shop all info to his holder and admins else short info"""
         instance = kwargs.get('instance')
-        if self.is_current_user_admin() or self.is_current_user_holder(instance):
+        user = auth.current_user()
+
+        if helpers.is_admin(user) or helpers.is_holder(instance, UserRoles.owner, user):
             return ShopExtendedSchemaOut
         return ShopShortSchemaOut
 
-    @staticmethod
-    def is_current_user_admin():
-        user = auth.current_user()
-        return user and user.role in AdminRoles
 
-    @staticmethod
-    def is_current_user_holder(instance):
-        user = auth.current_user()
-        return user and user.role != UserRoles.customer and user.id == instance.holder_id
-
-
-class ShopResource(ShopGetResourceMixin, CreateResourceMixin, GetListResourceMixin):
+class ShopResource(ShopGetSchemaOutMixin, CreateResourceMixin, GetListResourceMixin):
+    MANAGER = ShopManager
     MODEL = ShopModel
     SCHEMA_IN = ShopCreateSchemaIn
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
@@ -60,22 +52,19 @@ class ShopResource(ShopGetResourceMixin, CreateResourceMixin, GetListResourceMix
 
         return criteria
 
-    def get_manager(self):
-        if request.method == "GET":
-            return ShopManager
-        return super().get_manager()
 
-
-class ShopSingleResource(ShopGetResourceMixin, GetResourceMixin, EditResourceMixin):
+class ShopSingleResource(ShopGetSchemaOutMixin, GetResourceMixin, EditResourceMixin, DeleteResourceMixin):
+    MANAGER = ShopManager
     MODEL = ShopModel
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
     @auth.login_optional
+    @execute_access_validators(
+        ValidatePageExist(),
+    )
     def get(self, pk):
-        shop = CRUDManager.get(self.get_model(), pk)
-        if shop.active or self.is_current_user_admin() or self.is_current_user_holder(shop):
-            return self.get_schema_out(instance=shop)().dump(shop), 200
-        raise Forbidden("Permission denied!")
+        user = auth.current_user()
+        return super().get(pk, user=user)
 
     @auth.login_required
     @execute_access_validators(
@@ -87,6 +76,15 @@ class ShopSingleResource(ShopGetResourceMixin, GetResourceMixin, EditResourceMix
     def put(self, pk):
         return super().put(pk)
 
+    @auth.login_required
+    @execute_access_validators(
+        ValidateRole(),
+        ValidateIsHolder(),
+        ValidatePageExist(),
+    )
+    def delete(self, pk):
+        return super().delete(pk)
+
     def get_schema_in(self, *args, **kwargs):
         # get object always returns shop because page exist validation is past
         pk = kwargs.get("pk")
@@ -94,6 +92,7 @@ class ShopSingleResource(ShopGetResourceMixin, GetResourceMixin, EditResourceMix
 
 
 class BrandLogoResource(RemoveImageBaseResource):
+    MANAGER = ShopManager
     MODEL = ShopModel
     SCHEMA_OUT = ShopExtendedSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
@@ -101,6 +100,7 @@ class BrandLogoResource(RemoveImageBaseResource):
 
 
 class VerifyShopResource(VerifyBaseResource):
+    MANAGER = ShopManager
     MODEL = ShopModel
     SCHEMA_OUT = ShopExtendedSchemaOut
     ALLOWED_ROLES = [AdminRoles.admin, AdminRoles.super_admin]
@@ -108,3 +108,22 @@ class VerifyShopResource(VerifyBaseResource):
     def get_data(self):
         data = super().get_data()
         return data | {"active": True}
+
+
+class DeactivateShopResource(EditResourceMixin):
+    MANAGER = ShopManager
+    MODEL = ShopModel
+    SCHEMA_OUT = ShopExtendedSchemaOut
+    ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
+
+    @auth.login_required
+    @execute_access_validators(
+        ValidateRole(),
+        ValidateIsHolder(),
+        ValidatePageExist(),
+    )
+    def put(self, pk):
+        return super().put(pk)
+
+    def get_data(self):
+        return {"active": False}

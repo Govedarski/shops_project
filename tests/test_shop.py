@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from db import db
+from managers.shop_manager import ShopManager
 from models import ShopModel
 from services.s3 import s3
 from tests import helpers
@@ -185,6 +186,7 @@ class TestApp(BaseTestCase):
         url = self.URL + "/" + str(item.id)
 
         resp = self.client.get(url, headers=self._AUTHORIZATION_HEADER)
+
         self.assertEqual(200, resp.status_code)
         self._test_schema_out(resp.json)
         self.assertEqual(item.name, resp.json["name"])
@@ -194,6 +196,7 @@ class TestApp(BaseTestCase):
         url = self.URL + "/" + str(item.id)
 
         resp = self.client.get(url, headers=self._create_authorization_header(AdminFactory))
+
         self.assertEqual(200, resp.status_code)
         self._test_schema_out(resp.json)
 
@@ -202,10 +205,12 @@ class TestApp(BaseTestCase):
         url = self.URL + "/" + str(item.id)
 
         resp = self.client.get(url, headers=self._create_authorization_header(CustomerFactory))
+
         self.assertEqual(200, resp.status_code)
         self._test_schema_out(resp.json, extended=False)
 
         resp = self.client.get(url, headers=self._create_authorization_header(OwnerFactory))
+
         self.assertEqual(200, resp.status_code)
         self._test_schema_out(resp.json, extended=False)
 
@@ -214,6 +219,7 @@ class TestApp(BaseTestCase):
         url = self.URL + "/" + str(item.id)
 
         resp = self.client.get(url)
+
         self.assertEqual(200, resp.status_code)
         self._test_schema_out(resp.json, extended=False)
 
@@ -222,11 +228,14 @@ class TestApp(BaseTestCase):
         url = self.URL + "/" + str(shop.id)
 
         resp = self.client.get(url)
+
         self.assertEqual(403, resp.status_code)
 
     def test_get_with_holder_and_inactive_shop_expect_200_and_list_of_all_shops(self):
         [self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id) for _ in range(4)]
+
         resp = self.client.get(self.URL, headers=self._AUTHORIZATION_HEADER)
+
         self.assertEqual(200, resp.status_code)
         self.assertEqual(4, len(resp.json))
 
@@ -236,7 +245,9 @@ class TestApp(BaseTestCase):
         second_shop_owner = OwnerFactory()
         [self._create_in_db(ShopModel, self._get_create_data(active=False), second_shop_owner.id) for _ in range(5)]
         [self._create_in_db(ShopModel, self._get_create_data(active=True), second_shop_owner.id) for _ in range(6)]
+
         resp = self.client.get(self.URL, headers=self._create_authorization_header(AdminFactory))
+
         self.assertEqual(200, resp.status_code)
         self.assertEqual(18, len(resp.json))
 
@@ -246,7 +257,9 @@ class TestApp(BaseTestCase):
         second_shop_owner = OwnerFactory()
         [self._create_in_db(ShopModel, self._get_create_data(active=False), second_shop_owner.id) for _ in range(5)]
         [self._create_in_db(ShopModel, self._get_create_data(active=True), second_shop_owner.id) for _ in range(6)]
+
         resp = self.client.get(self.URL)
+
         self.assertEqual(200, resp.status_code)
         self.assertEqual(9, len(resp.json))
 
@@ -258,13 +271,13 @@ class TestApp(BaseTestCase):
         [self._create_in_db(ShopModel, self._get_create_data(active=True), second_shop_owner.id) for _ in range(6)]
 
         resp = self.client.get(self.URL, headers=self._AUTHORIZATION_HEADER)
+
         self.assertEqual(200, resp.status_code)
         self.assertEqual(13, len(resp.json))
 
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_edit_not_verified_with_name_and_bulstat_expect_status_200_db_updated_correct_json(self, mocked_s3):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id)
-
         url = self.URL + "/" + str(shop.id)
         data = {"name": "Edited Shop",
                 "bulstat": "987654321",
@@ -285,7 +298,6 @@ class TestApp(BaseTestCase):
 
     def test_edit_verified_with_name_and_bulstat_expect_status_400_and_correct_json(self):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
-
         url = self.URL + "/" + str(shop.id)
         data = {"name": "Edited Shop",
                 "bulstat": "987654321",
@@ -301,7 +313,6 @@ class TestApp(BaseTestCase):
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_edit_verified_without_name_and_bulstat_expect_status_200_db_updated_correct_json(self, mocked_s3):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
-
         url = self.URL + "/" + str(shop.id)
         data = {"city": "Edited city",
                 } | self.VALID_BRAND_PHOTO_DATA
@@ -317,7 +328,6 @@ class TestApp(BaseTestCase):
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_change_profile_picture_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
-
         url = self.URL + "/" + str(shop.id)
         data = self.VALID_BRAND_PHOTO_DATA
 
@@ -330,7 +340,6 @@ class TestApp(BaseTestCase):
     @patch.object(s3, "delete_photo", return_value=None)
     def test_delete_existing_brand_logo_picture_expect_status_200_db_updated_correct_json(self, _):
         data = self._get_create_data(active=True) | {"brand_logo_image_url": "some.url"}
-
         shop = self._create_in_db(ShopModel, data, self._shop_owner.id)
         url = self.URL + "/" + str(shop.id) + "/brand_logo"
 
@@ -345,9 +354,8 @@ class TestApp(BaseTestCase):
         resp = self.client.delete(url, headers=self._AUTHORIZATION_HEADER)
         self.assertEqual(404, resp.status_code)
 
-    def test_verify_information_admin_user_expect_200_and_change_in_db(self):
-        shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
-
+    def test_verify_shop_admin_user_expect_200_and_change_in_db(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id)
         url = self.URL + "/" + str(shop.id) + "/verify"
 
         resp = self.client.put(url, headers=self._create_authorization_header(AdminFactory))
@@ -357,3 +365,37 @@ class TestApp(BaseTestCase):
         self.assertTrue(resp.json["active"])
         self.assertTrue(shop.verified)
         self.assertTrue(shop.active)
+
+    def test_delete_not_verified_shop_as_holder_expect_204_and_record_deleted_in_db(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id)
+        url = self.URL + "/" + str(shop.id)
+
+        resp = self.client.delete(url, headers=self._AUTHORIZATION_HEADER)
+        self.assertEqual(204, resp.status_code)
+
+    def test_delete_not_verified_shop_as_admin_expect_204_and_record_deleted_in_db(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id)
+        url = self.URL + "/" + str(shop.id)
+
+        resp = self.client.delete(url, headers=self._create_authorization_header(AdminFactory))
+        self.assertEqual(204, resp.status_code)
+
+    def test_delete_verified_shop_expect_403(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
+        url = self.URL + "/" + str(shop.id)
+
+        resp = self.client.delete(url, headers=self._AUTHORIZATION_HEADER)
+        self.assertEqual(403, resp.status_code)
+        self.assertEqual(ShopManager.DELETE_DENIED_MESSAGE, resp.json["message"])
+
+    def test_deactivate_shop_expect_200_and_change_in_db(self):
+        shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
+        url = self.URL + "/" + str(shop.id) + "/deactivate"
+
+        resp = self.client.put(url, headers=self._AUTHORIZATION_HEADER)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertTrue(resp.json["verified"])
+        self.assertFalse(resp.json["active"])
+        self.assertTrue(shop.verified)
+        self.assertFalse(shop.active)

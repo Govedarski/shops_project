@@ -23,7 +23,9 @@ class TestApp(BaseTestCase):
         ("delivery_address_details/1", "delete"),
         ("shop", "post"),
         ("shop/1", "put"),
+        ("shop/1", "delete"),
         ("shop/1/verify", "put"),
+        ("shop/1/deactivate", "put"),
         ("/shop/1/brand_logo", "delete"),
 
     )
@@ -93,8 +95,11 @@ class TestApp(BaseTestCase):
             ("/shop_owner/details/1/profile_picture", "delete"),
             ("/shop", "post"),
             ("shop/1", "put"),
+            ("shop/1", "delete"),
             ("/shop/1/verify", "put"),
             ("/shop/1/brand_logo", "delete"),
+            ("shop/1/deactivate", "put"),
+
         )
         user = CustomerFactory()
 
@@ -129,14 +134,21 @@ class TestApp(BaseTestCase):
             headers=self._crate_auth_header(user)
         )
 
-    def test_missing_permissions_for_not_holder_customer_raises(self):
+    def test_missing_permissions_for_not_holder_raises(self):
         endpoints = (
             ("/customer/details/1", "put"),
             ("/customer/details/1/profile_picture", "delete"),
             ("/delivery_address_details/1", "put"),
             ("/delivery_address_details/1", "get"),
             ("/delivery_address_details/1", "delete"),
+            ("/shop_owner/details/1", "put"),
+            ("/shop_owner/details/1/profile_picture", "delete"),
             ("shop/1", "put"),
+            ("/shop/1/brand_logo", "delete"),
+            ("shop/1", "put"),
+            ("shop/1", "delete"),
+            ("shop/1/deactivate", "put"),
+
         )
 
         user = CustomerFactory()
@@ -145,23 +157,6 @@ class TestApp(BaseTestCase):
             endpoints,
             self.assert_403,
             expected_resp_body={"message": ValidateIsHolder.ERROR_MESSAGE},
-            headers=self._crate_auth_header(user)
-        )
-
-    def test_missing_permissions_for_not_holder_shop_owner_raises(self):
-        endpoints = (
-            ("/shop_owner/details/1", "put"),
-            ("/shop_owner/details/1/profile_picture", "delete"),
-            ("shop/1", "put"),
-            ("/shop/1/brand_logo", "delete"),
-
-        )
-        user = OwnerFactory()
-
-        self._iterate_endpoints(
-            endpoints,
-            self.assert_403,
-            expected_resp_body={"message": ValidateRole.ERROR_MESSAGE},
             headers=self._crate_auth_header(user)
         )
 
@@ -177,8 +172,10 @@ class TestApp(BaseTestCase):
             ("/delivery_address_details/1", "get"),
             ("/delivery_address_details/1", "put"),
             ("/delivery_address_details/1", "delete"),
+            ("shop/1", "get"),
+            ("shop/1", "delete"),
             ("shop/1", "put"),
-
+            ("shop/1/deactivate", "put"),
         )
         user = SuperAdminFactory()
         self._iterate_endpoints(
