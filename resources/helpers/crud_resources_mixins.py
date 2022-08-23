@@ -35,7 +35,7 @@ class CreateResourceMixin(ABC, BaseResource):
         data = self.get_data()
         current_user = auth.current_user()
         instance = CRUDManager.create(self.get_model(), data, current_user)
-        return self.get_schema_out()().dump(instance), 201
+        return self.get_schema_out(instance=instance)().dump(instance), 201
 
 
 class GetResourceMixin(ABC, BaseResource):
@@ -44,7 +44,7 @@ class GetResourceMixin(ABC, BaseResource):
     @abstractmethod
     def get(self, pk):
         instance = CRUDManager.get(self.get_model(), pk)
-        return self.get_schema_out(pk=pk)().dump(instance), 200
+        return self.get_schema_out(instance=instance)().dump(instance), 200
 
 
 class GetListResourceMixin(ABC, BaseResource):
@@ -53,7 +53,7 @@ class GetListResourceMixin(ABC, BaseResource):
     @abstractmethod
     def get(self):
         obj_list = CRUDManager.get_all(self.get_model(), self.filter_by())
-        return [self.get_schema_out()().dump(instance) for instance in obj_list if instance], 200
+        return [self.get_schema_out(instance=instance)().dump(instance) for instance in obj_list if instance], 200
 
     def filter_by(self):
         return None
@@ -66,7 +66,7 @@ class EditResourceMixin(ABC, BaseResource):
     def put(self, pk):
         data = self.get_data()
         instance = CRUDManager.edit(self.get_model(), data, pk)
-        return self.get_schema_out(pk=pk)().dump(instance), 200
+        return self.get_schema_out(instance=instance)().dump(instance), 200
 
 
 class DeleteResourceMixin(ABC, BaseResource):
@@ -85,4 +85,4 @@ class DeleteImageResourceMixin(ABC, BaseResource):
     @abstractmethod
     def delete(self, pk):
         instance = CRUDManager.delete_image(self.get_model(), pk, self.IMAGE_FIELD_NAME)
-        return self.get_schema_out()().dump(instance), 200
+        return self.get_schema_out(instace=instance)().dump(instance), 200

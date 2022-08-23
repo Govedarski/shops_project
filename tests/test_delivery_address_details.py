@@ -39,8 +39,8 @@ class TestShopOwnerDetails(BaseTestCase):
 
     @staticmethod
     def _create_authorization_header(factory):
-        admin = factory()
-        token = generate_token(admin)
+        user = factory()
+        token = generate_token(user)
         return {"Authorization": f"Bearer {token}"}
 
     def test_create_DAD_with_no_auth_user_expect_201_correct_json_and_record_in_db(self):

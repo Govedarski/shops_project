@@ -6,8 +6,9 @@ from resources.helpers.access_endpoint_validators import ValidatePageExist, Vali
     ValidateIsHolder
 from resources.helpers.crud_resources_mixins import EditResourceMixin, CreateResourceMixin, GetListResourceMixin, \
     DeleteResourceMixin
-from schemas.request.details_schemas_in import AuthCreateDeliveryAddressDetailsSchemaIn, \
-    NoAuthCreateDeliveryAddressDetailsSchemaIn, EditDeliveryAddressDetailsSchemaIn
+from schemas.request.details_schemas_in.delivery_address_details_schemas_in import \
+    AuthCreateDeliveryAddressDetailsSchemaIn, NoAuthCreateDeliveryAddressDetailsSchemaIn, \
+    EditDeliveryAddressDetailsSchemaIn
 from schemas.response.details_schemas_out import ShopOwnerDetailsSchemaOut, DeliveryAddressDetailsSchemaOut
 from utils.resource_decorators import execute_access_validators
 
@@ -83,12 +84,12 @@ class DeliveryAddressDetailsResource(CreateResourceMixin, GetListResourceMixin):
                             "last_name": data["last_name"]}, user)
 
 
-class SingleDeliveryAddressDetailsResource(DetailsResource, DeleteResourceMixin):
+class DeliveryAddressDetailsSingleResource(DetailsResource, DeleteResourceMixin):
     MODEL = DeliveryAddressDetailsModel
     SCHEMA_IN = EditDeliveryAddressDetailsSchemaIn
     SCHEMA_OUT = DeliveryAddressDetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.customer, AdminRoles.admin, AdminRoles.super_admin]
-    NOT_FOUND_MESSAGE = "Delivery address details not found!"
+    NOT_FOUND_MESSAGE = "Delivery address details_schemas_in not found!"
 
     @auth.login_required
     @execute_access_validators(

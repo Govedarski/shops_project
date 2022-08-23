@@ -1,5 +1,6 @@
 import os
 
+from sqlalchemy.exc import InvalidRequestError
 from werkzeug.exceptions import NotFound
 
 from constants.Image_suffix import IMAGE_SUFFIX_IN_DB, IMAGE_SUFFIX_IN_SCHEMA, EXTENSION_SUFFIX_IN_SCHEMA
@@ -28,7 +29,11 @@ class CRUDManager:
     @staticmethod
     def get_all(model, filter_by):
         if filter_by:
-            return model.query.filter_by(**filter_by).all()
+            try:
+                return model.query.filter_by(**filter_by).all()
+            except InvalidRequestError:
+                # not sure empty list or BadRequest
+                return []
         return model.query.all()
 
     @classmethod
@@ -121,4 +126,3 @@ class CRUDManager:
 
         model.query.filter_by(id=instance.id).delete()
         [s3.delete_photo(photo) for photo in photo_to_delete if photo]
-

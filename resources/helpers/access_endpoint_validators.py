@@ -70,14 +70,6 @@ class ValidateIsHolder(BaseAccessValidator):
             raise Forbidden(self._get_error_message(instance))
 
 
-class ValidatePageExist(BaseAccessValidator):
-    ERROR_MESSAGE = "Page not found!"
-    CLASS_ERROR_MESSAGE_FIELD_NAME = "NOT_FOUND_MESSAGE"
-
-    def validate(self, instance, *args, **kwargs):
-        get_or_404(instance.get_model(), kwargs.get("pk"), self._get_error_message(instance))
-
-
 class ValidateUniqueness(BaseAccessValidator):
     ERROR_MESSAGE = "Unique constraint: Object already exist!"
     CLASS_ERROR_MESSAGE_FIELD_NAME = "UNIQUE_VALIDATION_MESSAGE"
@@ -86,6 +78,14 @@ class ValidateUniqueness(BaseAccessValidator):
         current_user = auth.current_user()
         if instance.get_model().query.filter_by(holder_id=current_user.id).first():
             raise Forbidden(self._get_error_message(instance))
+
+
+class ValidatePageExist(BaseAccessValidator):
+    ERROR_MESSAGE = "Page not found!"
+    CLASS_ERROR_MESSAGE_FIELD_NAME = "NOT_FOUND_MESSAGE"
+
+    def validate(self, instance, *args, **kwargs):
+        get_or_404(instance.get_model(), kwargs.get("pk"), self._get_error_message(instance))
 
 
 class ValidateSchema:

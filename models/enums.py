@@ -9,3 +9,20 @@ class UserRoles(Enum):
 class AdminRoles(Enum):
     admin = "Admin"
     super_admin = "Super Admin"
+
+
+class ProductCategories(Enum):
+    clothing = "Clothing"
+    shoes = "Shoes"
+    electronics = "Consumer electronics"
+    books = "Books"
+    games = "Games"
+    cosmetics = "Cosmetics and body care"
+    accessories = "Accessories"
+    food = "Food and drinks"
+    appliances = "Household appliances"
+    furniture = "Furniture and household goods"
+    sport = "Sport and outdoor"
+    toys = "Toys and baby products"
+    gardens = "Garden"
+    pets = "Pets"

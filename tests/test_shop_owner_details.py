@@ -13,7 +13,7 @@ from tests.helpers import generate_token
 
 
 class TestShopOwnerDetails(BaseTestCase):
-    URL = "/shop_owner/details"
+    URL = "/shop_owner/details_schemas_in"
     VALID_REQUIRED_DATA = {
         "first_name": "Testcho",
         "last_name": "Testchov",
@@ -70,7 +70,9 @@ class TestShopOwnerDetails(BaseTestCase):
         self.assertEqual(201, resp.status_code)
         self.assertEqual(mocked_s3.return_value, resp.json["profile_picture_image_url"])
 
-    def test_create_so_with_valid_data_and_creator_who_already_has_cd_expect_status_403_and_correct_error_message(self):
+    @patch.object(s3, "upload_photo", return_value="some.s3.url")
+    def test_create_so_with_valid_data_and_creator_who_already_has_cd_expect_status_403_and_correct_error_message(self,
+                                                                                                                  mocked_s3):
         self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
 
