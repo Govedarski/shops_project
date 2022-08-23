@@ -13,7 +13,7 @@ from tests.helpers import generate_token
 
 
 class TestShopOwnerDetails(BaseTestCase):
-    URL = "/shop_owner/details_schemas_in"
+    URL = "/shop_owner/details"
     VALID_REQUIRED_DATA = {
         "first_name": "Testcho",
         "last_name": "Testchov",

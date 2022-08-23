@@ -13,7 +13,7 @@ from tests.helpers import generate_token
 
 
 class TestCustomerDetails(BaseTestCase):
-    URL = "/customer/details_schemas_in"
+    URL = "/customer/details"
     VALID_REQUIRED_DATA = {
         "first_name": "Testcho",
         "last_name": "Testchov",

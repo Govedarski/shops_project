@@ -7,7 +7,7 @@ from models import AdminRoles, UserRoles
 
 class ShopManager:
     @classmethod
-    def get_list(cls, model, criteria, *args, **kwargs):
+    def get_list(cls, model, criteria, **kwargs):
         user = kwargs.get('user')
         try:
             return cls._fetch_data(model, criteria, user)

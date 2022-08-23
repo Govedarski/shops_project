@@ -92,7 +92,7 @@ class ValidateSchema:
     @staticmethod
     def validate(instance, *args, **kwargs):
         data = request.get_json()
-        schema = instance.get_schema_in()
+        schema = instance.get_schema_in(*args, **kwargs)
         errors = schema().validate(data)
         if errors:
             raise BadRequest(errors)

@@ -30,6 +30,9 @@ class BaseResource(Resource):
     def get_manager(self, *args, **kwargs):
         return self.MANAGER
 
+    def get_object(self, pk):
+        return self.get_model().query.filter_by(id=pk).first()
+
 
 class CreateResourceMixin(ABC, BaseResource):
     """Minimum required class attributes: MODEL, SCHEMA_OUT"""

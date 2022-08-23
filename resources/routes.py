@@ -16,14 +16,14 @@ routes = (
     # ("pass", "/owner/<:id>"),
     # TODO: get with all related details_schemas_in delete with all related details_schemas_in if no order linked to it
 
-    (CreateCustomerDetailsResource, "/customer/details_schemas_in"),  # POST
-    (CustomerDetailsResource, "/customer/details_schemas_in/<int:pk>"),  # GET, PUT
-    (CustomerProfilePictureResource, "/customer/details_schemas_in/<int:pk>/profile_picture"),  # DELETE
+    (CreateCustomerDetailsResource, "/customer/details"),  # POST
+    (CustomerDetailsResource, "/customer/details/<int:pk>"),  # GET, PUT
+    (CustomerProfilePictureResource, "/customer/details/<int:pk>/profile_picture"),  # DELETE
 
-    (CreateShopOwnerDetailsResource, "/shop_owner/details_schemas_in"),  # POST
-    (ShopOwnerDetailsResource, "/shop_owner/details_schemas_in/<int:pk>"),  # GET, PUT
-    (VerifyShopOwnerDetailsResource, "/shop_owner/details_schemas_in/<int:pk>/verify"),  # PUT
-    (ShopOwnerProfilePictureResource, "/shop_owner/details_schemas_in/<int:pk>/profile_picture"),  # DELETE
+    (CreateShopOwnerDetailsResource, "/shop_owner/details"),  # POST
+    (ShopOwnerDetailsResource, "/shop_owner/details/<int:pk>"),  # GET, PUT
+    (VerifyShopOwnerDetailsResource, "/shop_owner/details/<int:pk>/verify"),  # PUT
+    (ShopOwnerProfilePictureResource, "/shop_owner/details/<int:pk>/profile_picture"),  # DELETE
 
     (DeliveryAddressDetailsResource, "/delivery_address_details"),  # POST, GET
     (DeliveryAddressDetailsSingleResource, "/delivery_address_details/<int:pk>"),  # GET, PUT, DELETE

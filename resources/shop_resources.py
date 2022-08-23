@@ -9,7 +9,7 @@ from resources.helpers.access_endpoint_validators import ValidateRole, ValidateS
     ValidatePageExist
 from resources.helpers.crud_resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
     DeleteImageResourceMixin, GetListResourceMixin
-from schemas.request.shop_schema_in import ShopCreateSchemaIn, ShopEditSchemaIn
+from schemas.request.shop_schema_in import ShopCreateSchemaIn, ShopVerifiedEditSchemaIn, ShopNotVerifiedEditSchemaIn
 from schemas.response.shop_schemas_out import ShopExtendedSchemaOut, ShopShortSchemaOut
 from utils.resource_decorators import execute_access_validators
 
@@ -67,7 +67,6 @@ class ShopResource(ShopGetResourceMixin, CreateResourceMixin, GetListResourceMix
 
 class ShopSingleResource(ShopGetResourceMixin, GetResourceMixin, EditResourceMixin):
     MODEL = ShopModel
-    SCHEMA_IN = ShopEditSchemaIn
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
     @auth.login_optional
@@ -86,6 +85,11 @@ class ShopSingleResource(ShopGetResourceMixin, GetResourceMixin, EditResourceMix
     )
     def put(self, pk):
         return super().put(pk)
+
+    def get_schema_in(self, *args, **kwargs):
+        # get object always returns shop because page exist validation is past
+        pk = kwargs.get("pk")
+        return ShopVerifiedEditSchemaIn if self.get_object(pk).verified else ShopNotVerifiedEditSchemaIn
 
 
 class ShopBrandPictureResource(DeleteImageResourceMixin):

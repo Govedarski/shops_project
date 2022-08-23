@@ -48,19 +48,7 @@ class ShopCreateSchemaIn(Schema):
                                                                              VALID_DOCUMENT_EXTENSIONS).validate)
 
 
-class ShopEditSchemaIn(Schema):
-    name = fields.Str(
-        validate=validate.And(
-            validate.Length(min=2, max=64),
-            ValidateUniqueness("name", ShopModel).validate,
-        ))
-
-    bulstat = fields.Str(
-        validate=validate.And(
-            validate.Length(equal=9),
-            ValidateIsNumeric().validate
-        ))
-
+class ShopVerifiedEditSchemaIn(Schema):
     city = fields.Str(
         validate=validate.And(
             validate.Length(min=2, max=64),
@@ -82,3 +70,17 @@ class ShopEditSchemaIn(Schema):
     brand_logo_photo = fields.String()
 
     brand_logo_extension = fields.String(validate=ValidateExtension("photos", VALID_PHOTO_EXTENSIONS).validate)
+
+
+class ShopNotVerifiedEditSchemaIn(ShopVerifiedEditSchemaIn):
+    name = fields.Str(
+        validate=validate.And(
+            validate.Length(min=2, max=64),
+            ValidateUniqueness("name", ShopModel).validate,
+        ))
+
+    bulstat = fields.Str(
+        validate=validate.And(
+            validate.Length(equal=9),
+            ValidateIsNumeric().validate
+        ))

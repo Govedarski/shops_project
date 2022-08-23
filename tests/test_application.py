@@ -8,20 +8,21 @@ from tests.helpers import generate_token
 class TestApp(BaseTestCase):
     ENDPOINTS_DATA = (
         ("/admin/register", "post"),
-        ("/customer/details_schemas_in", "post"),
-        ("/customer/details_schemas_in/1", "get"),
-        ("/customer/details_schemas_in/1", "put"),
-        ("/customer/details_schemas_in/1/profile_picture", "delete"),
-        ("/shop_owner/details_schemas_in", "post"),
-        ("/shop_owner/details_schemas_in/1", "put"),
-        ("/shop_owner/details_schemas_in/1", "get"),
-        ("/shop_owner/details_schemas_in/1/verify", "put"),
-        ("/shop_owner/details_schemas_in/1/profile_picture", "delete"),
+        ("/customer/details", "post"),
+        ("/customer/details/1", "get"),
+        ("/customer/details/1", "put"),
+        ("/customer/details/1/profile_picture", "delete"),
+        ("/shop_owner/details", "post"),
+        ("/shop_owner/details/1", "put"),
+        ("/shop_owner/details/1", "get"),
+        ("/shop_owner/details/1/verify", "put"),
+        ("/shop_owner/details/1/profile_picture", "delete"),
         ("delivery_address_details", "get"),
         ("delivery_address_details/1", "get"),
         ("delivery_address_details/1", "put"),
         ("delivery_address_details/1", "delete"),
         ("shop", "post"),
+        ("shop/1", "put"),
 
     )
 
@@ -84,11 +85,13 @@ class TestApp(BaseTestCase):
     def test_missing_permissions_for_customer_raises(self):
         endpoints = (
             ("/admin/register", "post"),
-            ("/shop_owner/details_schemas_in", "post"),
-            ("/shop_owner/details_schemas_in/1", "put"),
-            ("/shop_owner/details_schemas_in/1/verify", "put"),
-            ("/shop_owner/details_schemas_in/1/profile_picture", "delete"),
+            ("/shop_owner/details", "post"),
+            ("/shop_owner/details/1", "put"),
+            ("/shop_owner/details/1/verify", "put"),
+            ("/shop_owner/details/1/profile_picture", "delete"),
             ("/shop", "post"),
+            ("shop/1", "put"),
+
         )
         user = CustomerFactory()
 
@@ -102,9 +105,9 @@ class TestApp(BaseTestCase):
     def test_missing_permissions_for_shop_owner_raises(self):
         endpoints = (
             ("/admin/register", "post"),
-            ("/customer/details_schemas_in", "post"),
-            ("/customer/details_schemas_in/1", "put"),
-            ("/customer/details_schemas_in/1/profile_picture", "delete"),
+            ("/customer/details", "post"),
+            ("/customer/details/1", "put"),
+            ("/customer/details/1/profile_picture", "delete"),
             ("/delivery_address_details", "post"),
             ("/delivery_address_details", "get"),
             ("/delivery_address_details/1", "put"),
@@ -122,11 +125,12 @@ class TestApp(BaseTestCase):
 
     def test_missing_permissions_for_not_holder_customer_raises(self):
         endpoints = (
-            ("/customer/details_schemas_in/1", "put"),
-            ("/customer/details_schemas_in/1/profile_picture", "delete"),
+            ("/customer/details/1", "put"),
+            ("/customer/details/1/profile_picture", "delete"),
             ("/delivery_address_details/1", "put"),
             ("/delivery_address_details/1", "get"),
             ("/delivery_address_details/1", "delete"),
+            ("shop/1", "put"),
         )
 
         user = CustomerFactory()
@@ -140,8 +144,8 @@ class TestApp(BaseTestCase):
 
     def test_missing_permissions_for_not_holder_shop_owner_raises(self):
         endpoints = (
-            ("/shop_owner/details_schemas_in/1", "put"),
-            ("/shop_owner/details_schemas_in/1/profile_picture", "delete"),
+            ("/shop_owner/details/1", "put"),
+            ("/shop_owner/details/1/profile_picture", "delete"),
         )
         user = OwnerFactory()
 
@@ -154,16 +158,18 @@ class TestApp(BaseTestCase):
 
     def test_page_not_found_raises(self):
         endpoints = (
-            ("/customer/details_schemas_in/1", "get"),
-            ("/customer/details_schemas_in/1", "put"),
-            ("/customer/details_schemas_in/1/profile_picture", "delete"),
-            ("/shop_owner/details_schemas_in/1", "get"),
-            ("/shop_owner/details_schemas_in/1", "put"),
-            ("/shop_owner/details_schemas_in/1/profile_picture", "delete"),
-            ("/shop_owner/details_schemas_in/1/verify", "put"),
+            ("/customer/details/1", "get"),
+            ("/customer/details/1", "put"),
+            ("/customer/details/1/profile_picture", "delete"),
+            ("/shop_owner/details/1", "get"),
+            ("/shop_owner/details/1", "put"),
+            ("/shop_owner/details/1/profile_picture", "delete"),
+            ("/shop_owner/details/1/verify", "put"),
             ("/delivery_address_details/1", "get"),
             ("/delivery_address_details/1", "put"),
             ("/delivery_address_details/1", "delete"),
+            ("shop/1", "put"),
+
         )
         user = SuperAdminFactory()
         self._iterate_endpoints(
