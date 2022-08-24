@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
 
 from flask import request
-from werkzeug.exceptions import BadRequest, Forbidden
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from managers.auth_manager import auth
 from models import AdminRoles
-from utils.helpers import get_or_404
 
 
 class BaseAccessValidator(ABC):
@@ -62,7 +61,7 @@ class ValidateIsHolder(BaseAccessValidator):
 
         pk = kwargs.get('pk')
         is_holder = False
-        obj = instance.get_model().query.filter_by(id=pk).first()
+        obj = instance.get_object(pk)
         if obj:
             is_holder = obj.holder_id == current_user.id
 
@@ -85,7 +84,10 @@ class ValidatePageExist(BaseAccessValidator):
     CLASS_ERROR_MESSAGE_FIELD_NAME = "NOT_FOUND_MESSAGE"
 
     def validate(self, instance, *args, **kwargs):
-        get_or_404(instance.get_model(), kwargs.get("pk"), self._get_error_message(instance))
+        pk = kwargs.get('pk')
+        obj = instance.get_object(pk)
+        if not obj:
+            raise NotFound(self._get_error_message(instance))
 
 
 class ValidateSchema:

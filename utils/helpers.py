@@ -1,7 +1,7 @@
 import base64
 import uuid
 
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest
 
 from models import UserRoles, CustomerModel, ShopOwnerModel, AdminRoles, AdminModel
 
@@ -27,15 +27,6 @@ def is_admin(user):
 
 def is_holder(instance, holder_role, user):
     return user and user.role == holder_role and user.id == instance.holder_id
-
-
-def get_or_404(model, pk, message=None):
-    if not message:
-        message = "Page not found!"
-
-    instance = model.query.filter_by(id=pk).first()
-    if not instance:
-        raise NotFound(message)
 
 
 def decode_file(encoded_file):

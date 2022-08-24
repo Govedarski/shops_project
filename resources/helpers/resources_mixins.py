@@ -31,7 +31,10 @@ class BaseResource(Resource):
         return self.MANAGER
 
     def get_object(self, pk):
-        return self.get_model().query.filter_by(id=pk).first()
+        # Cache object. Use it multiple times with 1 db call.
+        if not hasattr(self, "_object"):
+            setattr(self, "_object", self.get_model().query.filter_by(id=pk).first())
+        return self._object
 
 
 class CreateResourceMixin(ABC, BaseResource):
