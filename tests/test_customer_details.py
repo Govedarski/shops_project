@@ -1,9 +1,8 @@
 from unittest.mock import patch
 
 from db import db
+from managers.details_managers.customer_details_manager import CustomerDetailsManager
 from models import CustomerDetailsModel
-from resources.details_resources.customer_details_resources import CustomerDetailsResource
-from resources.helpers.access_endpoint_validators import ValidateUniqueness
 from services.s3 import s3
 from tests import helpers
 from tests.base_test_case import BaseTestCase
@@ -13,7 +12,7 @@ from tests.helpers import generate_token
 
 
 class TestCustomerDetails(BaseTestCase):
-    URL = "/customer/details"
+    URL = "customer_details"
     VALID_REQUIRED_DATA = {
         "first_name": "Testcho",
         "last_name": "Testchov",
@@ -56,7 +55,7 @@ class TestCustomerDetails(BaseTestCase):
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
 
         self.assertEqual(403, resp.status_code)
-        self.assertEqual(ValidateUniqueness.ERROR_MESSAGE, resp.json["message"])
+        self.assertEqual(CustomerDetailsManager.UNIQUE_CONSTRAINT_MESSAGE, resp.json["message"])
 
     def test_create_cd_with_partly_missing_photo_data_expect_status_400_and_correct_error_messages(self):
         data_no_extension = self.VALID_REQUIRED_DATA | {
@@ -109,7 +108,7 @@ class TestCustomerDetails(BaseTestCase):
         resp = self.client.get(url, headers=self._AUTHORIZATION_HEADER)
 
         self.assertEqual(404, resp.status_code)
-        self.assertEqual(CustomerDetailsResource.NOT_FOUND_MESSAGE, resp.json["message"])
+        self.assertEqual("Page not found!", resp.json["message"])
 
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_edit_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):

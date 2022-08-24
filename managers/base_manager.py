@@ -1,68 +1,86 @@
 import os
 
 from sqlalchemy.exc import InvalidRequestError
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, Forbidden
 
 from constants.Image_suffix import IMAGE_SUFFIX_IN_DB, IMAGE_SUFFIX_IN_SCHEMA, EXTENSION_SUFFIX_IN_SCHEMA
 from constants.roots import TEMP_DIR
 from db import db
+from models import AdminRoles
 from services.s3 import s3
+from utils import helpers
 from utils.helpers import save_file, create_photo_from_json, has_photo, get_photo_name_by_url
 
 
 class CRUDManager:
+    MODEL = None
+    UNIQUE = False
+    UNIQUE_CONSTRAINT_MESSAGE = "Unique constraint: Object already exist!"
+    PERMISSION_DENIED_MESSAGE = "Permission denied!"
+
     @classmethod
-    def create(cls, model, data, user, **kwargs):
+    def create(cls, data, user, **kwargs):
+        if cls._uniqueness_required():
+            cls._check_uniqueness(user)
+
         data["holder_id"] = None
-        if hasattr(model, "holder_id") and (not model.holder_id.nullable or user):
+        if hasattr(cls.get_model(), "holder_id") and (not cls.get_model().holder_id.nullable or user):
             data["holder_id"] = user.id
 
-        if not hasattr(model, "get_all_image_field_names"):
-            return cls._create_in_db(model, data)
+        if not hasattr(cls.get_model(), "get_all_image_field_names"):
+            return cls._create_in_db(cls.get_model(), data)
 
-        return cls._processed_with_photos(model, data)
+        return cls._processed_with_photos(cls.get_model(), data)
 
     @classmethod
-    def get(cls, model, pk, **kwargs):
-        return cls._get_instance(model, pk)
+    def get(cls, pk, **kwargs):
+        cls._check_access(pk, **kwargs)
 
-    @staticmethod
-    def get_list(model, filter_by, **kwargs):
+        return cls._get_instance(cls.get_model(), pk)
+
+    @classmethod
+    def get_list(cls, filter_by, **kwargs):
         if filter_by:
             try:
-                return model.query.filter_by(**filter_by).all()
+                return cls.get_model().query.filter_by(**filter_by).all()
             except InvalidRequestError:
                 # not sure empty list or BadRequest
                 return []
-        return model.query.all()
+        return cls.get_model().query.all()
 
     @classmethod
-    def edit(cls, model, data, pk, **kwargs):
-        instance = cls._get_instance(model, pk)
-        if not hasattr(model, "get_all_image_field_names"):
-            model.query.filter_by(id=instance.id).update(data)
+    def edit(cls, data, pk, **kwargs):
+        cls._check_access(pk, **kwargs)
+
+        instance = cls._get_instance(cls.get_model(), pk)
+        if not hasattr(cls.get_model(), "get_all_image_field_names"):
+            cls.get_model().query.filter_by(id=instance.id).update(data)
             return instance
 
-        return cls._processed_with_photos(model, data, instance)
+        return cls._processed_with_photos(cls.get_model(), data, instance)
 
     @classmethod
-    def delete(cls, model, pk, **kwargs):
-        instance = cls._get_instance(model, pk)
-        if not hasattr(model, "get_all_image_field_names"):
-            model.query.filter_by(id=instance.id).delete()
+    def delete(cls, pk, **kwargs):
+        cls._check_access(pk, **kwargs)
+
+        instance = cls._get_instance(cls.get_model(), pk)
+        if not hasattr(cls.get_model(), "get_all_image_field_names"):
+            cls.get_model().query.filter_by(id=instance.id).delete()
             return None
 
-        return cls._delete_with_photos(model, instance)
+        return cls._delete_with_photos(cls.get_model(), instance)
 
     @classmethod
-    def delete_image(cls, model, pk, image_field_name, **kwargs):
-        instance = cls._get_instance(model, pk)
+    def delete_image(cls, pk, image_field_name, **kwargs):
+        cls._check_access(pk, **kwargs)
+
+        instance = cls._get_instance(cls.get_model(), pk)
         image_field_name_with_suffix = image_field_name + IMAGE_SUFFIX_IN_DB
         photo = get_photo_name_by_url(getattr(instance, image_field_name_with_suffix))
         if not photo:
             raise NotFound('Picture not found!')
 
-        model.query.filter_by(id=instance.id).update({image_field_name_with_suffix: None})
+        cls.get_model().query.filter_by(id=instance.id).update({image_field_name_with_suffix: None})
         s3.delete_photo(photo)
         return instance
 
@@ -119,8 +137,8 @@ class CRUDManager:
         finally:
             [os.remove(path) for path in paths]
 
-    @classmethod
-    def _delete_with_photos(cls, model, instance, **kwargs):
+    @staticmethod
+    def _delete_with_photos(model, instance, **kwargs):
         image_field_names = model.get_all_image_field_names()
         photo_to_delete = []
 
@@ -130,3 +148,31 @@ class CRUDManager:
 
         model.query.filter_by(id=instance.id).delete()
         [s3.delete_photo(photo) for photo in photo_to_delete if photo]
+
+    @classmethod
+    def get_model(cls):
+        return cls.MODEL
+
+    @classmethod
+    def _check_uniqueness(cls, user):
+        if cls.get_model().query.filter_by(holder_id=user.id).first():
+            raise Forbidden(cls.UNIQUE_CONSTRAINT_MESSAGE)
+
+    @classmethod
+    def _is_holder(cls, instance, user):
+        if user.role in AdminRoles:
+            return
+
+        if not user or not instance.holder_id == user.id:
+            raise Forbidden(cls.PERMISSION_DENIED_MESSAGE)
+
+    @classmethod
+    def _check_access(cls, pk, **kwargs):
+        instance = helpers.get_or_404(cls.get_model(), pk)
+        if kwargs.get("holder_required"):
+            user = kwargs.get("user")
+            cls._is_holder(instance, user)
+
+    @classmethod
+    def _uniqueness_required(cls):
+        return cls.UNIQUE

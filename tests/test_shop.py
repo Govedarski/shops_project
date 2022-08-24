@@ -6,13 +6,13 @@ from models import ShopModel
 from services.s3 import s3
 from tests import helpers
 from tests.base_test_case import BaseTestCase
-from tests.constants import ENCODED_PICTURE
+from tests.constants import ENCODED_PICTURE, Endpoints
 from tests.factories import OwnerFactory, AdminFactory, CustomerFactory
 from tests.helpers import generate_token
 
 
 class TestApp(BaseTestCase):
-    URL = "/shop"
+    URL = Endpoints.SHOPS
     VALID_DATA = {
         "name": "Testov shop",
         "bulstat": "123465789",

@@ -3,38 +3,43 @@ import itertools
 from sqlalchemy.exc import InvalidRequestError
 from werkzeug.exceptions import Forbidden
 
-from managers.crud_manager import CRUDManager
-from models import UserRoles
+from managers.base_manager import CRUDManager
+from models import UserRoles, ShopModel
 from utils import helpers
 
 
 class ShopManager(CRUDManager):
+    MODEL = ShopModel
     PERMISSION_DENIED_MESSAGE = "Permission denied!"
     DELETE_DENIED_MESSAGE = "Cannot delete verified shop!"
 
     @classmethod
-    def get(cls, model, pk, **kwargs):
+    def get(cls, pk, **kwargs):
+        cls._check_access(pk, **kwargs)
+
         user = kwargs.get('user')
-        shop = cls._get_instance(model, pk)
+        shop = cls._get_instance(cls.get_model(), pk)
         if helpers.is_admin(user) or helpers.is_holder(shop, UserRoles.owner, user) or shop.active:
             return shop
         raise Forbidden(cls.PERMISSION_DENIED_MESSAGE)
 
     @classmethod
-    def get_list(cls, model, criteria, **kwargs):
+    def get_list(cls, criteria, **kwargs):
         user = kwargs.get('user')
         try:
-            return cls._fetch_data(model, criteria, user)
+            return cls._fetch_data(cls.get_model(), criteria, user)
         except InvalidRequestError:
             # not sure empty list or BadRequest
             return []
 
     @classmethod
-    def delete(cls, model, pk, **kwargs):
-        shop = cls._get_instance(model, pk)
+    def delete(cls, pk, **kwargs):
+        cls._check_access(pk, **kwargs)
+
+        shop = cls._get_instance(cls.get_model(), pk)
         if shop.verified:
             raise Forbidden(cls.DELETE_DENIED_MESSAGE)
-        return super().delete(model, pk)
+        return super().delete(pk)
 
     @staticmethod
     def _fetch_data(model, criteria, user):

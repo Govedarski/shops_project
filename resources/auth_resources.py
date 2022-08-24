@@ -2,7 +2,7 @@ from werkzeug.security import generate_password_hash
 
 from managers.auth_manager import auth
 from managers.user_manager import UserManager
-from models import AdminRoles, AdminModel
+from models import AdminRoles
 from resources.helpers.access_endpoint_validators import ValidateSchema, ValidateRole
 from resources.helpers.resources_mixins import BaseResource
 from schemas.request.authentication_schemas_in import RegisterSchemaIn, RegisterAdminSchemaIn
@@ -15,10 +15,8 @@ class RegisterResource(BaseResource):
 
     @execute_access_validators(ValidateSchema())
     def post(self):
-        user_model = self.get_model()
         data = self.get_data()
-        data.pop('role')
-        token = UserManager.register(user_model, data)
+        token = UserManager.register(data)
         return {"token": token}, 201
 
     def get_data(self):
@@ -41,34 +39,12 @@ class RegisterAdminResource(BaseResource):
     )
     def post(self):
         data = self.get_data()
-        user_model = helpers.get_user_model(data['role'])
-
-        user = user_model.query.filter_by(id=data["id"]).first()
-        admin_data = self._get_admin_data(user)
-        UserManager.register(AdminModel, admin_data)
-        return {}, 204
-
-    @staticmethod
-    def _get_admin_data(user):
-        return {
-            "username": user.username,
-            "email": user.email,
-            "password": user.password,
-            "role": AdminRoles.admin
-        }
+        result = UserManager.register_admin(data)
+        return result, 200
 
 
 class LoginResource(BaseResource):
     def post(self):
-        user_model = self.get_model()
         data = self.get_data()
-        data.pop('role')
-        token = UserManager.login(user_model, data)
+        token = UserManager.login(data)
         return {"token": token}, 200
-
-    def get_data(self):
-        data = super().get_data()
-        return data
-
-    def get_model(self):
-        return helpers.get_user_or_admin_model(self.get_data()['role'])

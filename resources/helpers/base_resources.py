@@ -1,6 +1,6 @@
 from managers.auth_manager import auth
 from models import AdminRoles
-from resources.helpers.access_endpoint_validators import ValidateRole, ValidatePageExist, ValidateIsHolder
+from resources.helpers.access_endpoint_validators import ValidateRole
 from resources.helpers.resources_mixins import EditResourceMixin, DeleteImageResourceMixin
 from utils.resource_decorators import execute_access_validators
 
@@ -12,7 +12,6 @@ class VerifyBaseResource(EditResourceMixin):
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidatePageExist(),
     )
     def put(self, pk):
         return super().put(pk)
@@ -25,8 +24,10 @@ class RemoveImageBaseResource(DeleteImageResourceMixin):
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
     )
-    def delete(self, pk):
-        return super().delete(pk)
+    def delete(self, pk, **kwargs):
+        return super().delete(
+            pk,
+            holder_required=True,
+            user=auth.current_user(),
+            **kwargs)

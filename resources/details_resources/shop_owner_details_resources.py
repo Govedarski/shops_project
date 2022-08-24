@@ -1,5 +1,6 @@
 from managers.auth_manager import auth
-from models import ShopOwnerDetailsModel, UserRoles, AdminRoles
+from managers.details_managers.shop_owner_details_manager import ShopOwnerDetailsManager
+from models import UserRoles, AdminRoles
 from resources.details_resources.base_details_resources import CreateDetailsResource, DetailsResource, \
     RemoveIbanSpacesMixin
 from resources.helpers.base_resources import VerifyBaseResource, RemoveImageBaseResource
@@ -9,18 +10,17 @@ from schemas.response.details_schemas_out import ShopOwnerDetailsSchemaOut, Deta
 
 
 class CreateShopOwnerDetailsResource(RemoveIbanSpacesMixin, CreateDetailsResource):
-    MODEL = ShopOwnerDetailsModel
+    MANAGER = ShopOwnerDetailsManager
     SCHEMA_IN = CreateShopOwnerDetailsSchemaIn
     SCHEMA_OUT = ShopOwnerDetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
 
 class ShopOwnerDetailsResource(RemoveIbanSpacesMixin, DetailsResource):
-    MODEL = ShopOwnerDetailsModel
+    MANAGER = ShopOwnerDetailsManager
     SCHEMA_IN = EditShopOwnerDetailsSchemaIn
     SCHEMA_OUT = ShopOwnerDetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
-    NOT_FOUND_MESSAGE = "Shop owner details_schemas_in not found!"
 
     def get_schema_out(self, **kwargs):
         current_user = auth.current_user()
@@ -34,14 +34,13 @@ class ShopOwnerDetailsResource(RemoveIbanSpacesMixin, DetailsResource):
 
 
 class ShopOwnerProfilePictureResource(RemoveImageBaseResource):
-    MODEL = ShopOwnerDetailsModel
+    MANAGER = ShopOwnerDetailsManager
     SCHEMA_OUT = DetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
     IMAGE_FIELD_NAME = "profile_picture"
-    NOT_FOUND_MESSAGE = "Shop owner details_schemas_in not found!"
 
 
 class VerifyShopOwnerDetailsResource(VerifyBaseResource):
-    MODEL = ShopOwnerDetailsModel
+    MANAGER = ShopOwnerDetailsManager
     SCHEMA_OUT = ShopOwnerDetailsSchemaOut
     ALLOWED_ROLES = [AdminRoles.admin, AdminRoles.super_admin]

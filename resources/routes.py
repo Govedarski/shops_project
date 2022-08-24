@@ -9,32 +9,31 @@ from resources.shop_resources import ShopResource, ShopSingleResource, VerifySho
     DeactivateShopResource
 
 routes = (
-    (RegisterResource, "/register"),  # POST
-    (RegisterAdminResource, "/admin/register"),  # POST
+    (RegisterResource, "/users/register"),  # POST
+    (RegisterAdminResource, "/admins/register"),  # POST
     (LoginResource, "/login"),  # POST
 
     # ("pass", "/customer/<:id>"),
     # ("pass", "/owner/<:id>"),
-    # (pass, "/shop/<int:pk>/products"),
     # TODO: get with all related details_schemas_in delete with all related details_schemas_in if no order linked to it
 
-    (CreateCustomerDetailsResource, "/customer/details"),  # POST
-    (CustomerDetailsResource, "/customer/details/<int:pk>"),  # GET, PUT
-    (CustomerProfilePictureResource, "/customer/details/<int:pk>/profile_picture"),  # DELETE
+    (CreateCustomerDetailsResource, "/customer_details"),  # POST
+    (CustomerDetailsResource, "/customer_details/<int:pk>"),  # PUT, GET
+    (CustomerProfilePictureResource, "/customer_details/<int:pk>/profile_picture"),  # DELETE
 
-    (CreateShopOwnerDetailsResource, "/shop_owner/details"),  # POST
-    (ShopOwnerDetailsResource, "/shop_owner/details/<int:pk>"),  # GET, PUT
-    (VerifyShopOwnerDetailsResource, "/shop_owner/details/<int:pk>/verify"),  # PUT
-    (ShopOwnerProfilePictureResource, "/shop_owner/details/<int:pk>/profile_picture"),  # DELETE
+    (CreateShopOwnerDetailsResource, "/shop_owner_details"),  # POST
+    (ShopOwnerDetailsResource, "/shop_owner_details/<int:pk>"),  # GET, PUT
+    (VerifyShopOwnerDetailsResource, "/shop_owner_details/<int:pk>/verify"),  # PUT
+    (ShopOwnerProfilePictureResource, "/shop_owner_details/<int:pk>/profile_picture"),  # DELETE
 
     (DeliveryAddressDetailsResource, "/delivery_address_details"),  # POST, GET
     (DeliveryAddressDetailsSingleResource, "/delivery_address_details/<int:pk>"),  # GET, PUT, DELETE
 
-    (ShopResource, "/shop"),  # POST, GET
-    (ShopSingleResource, "/shop/<int:pk>"),  # GET, PUT, DELETE
-    (VerifyShopResource, "/shop/<int:pk>/verify"),  # PUT
-    (DeactivateShopResource, "/shop/<int:pk>/deactivate"),  # PUT
-    (BrandLogoResource, "/shop/<int:pk>/brand_logo"),  # DELETE
+    (ShopResource, "/shops"),  # POST, GET
+    (ShopSingleResource, "/shops/<int:pk>"),  # GET, PUT, DELETE
+    (VerifyShopResource, "/shops/<int:pk>/verify"),  # PUT
+    (DeactivateShopResource, "/shops/<int:pk>/deactivate"),  # PUT
+    (BrandLogoResource, "/shops/<int:pk>/brand_logo"),  # DELETE
 
     # (ShopResource, "/product"),  # POST - list of products, GET
     # (ShopSingleResource, "/product/<int:pk>"),  # GET, PUT, DELETE

@@ -1,34 +1,40 @@
+from unittest.mock import patch
+
 from managers.auth_manager import AuthManager
-from resources.helpers.access_endpoint_validators import ValidateRole, ValidateIsHolder
+from resources.details_resources.base_details_resources import RemoveIbanSpacesMixin
+from resources.helpers.access_endpoint_validators import ValidateRole, ValidateIsHolder, ValidateSchema
 from tests.base_test_case import BaseTestCase
+from tests.constants import Endpoints
 from tests.factories import CustomerFactory, OwnerFactory, AdminFactory, SuperAdminFactory
 from tests.helpers import generate_token
 
 
 class TestApp(BaseTestCase):
-    ENDPOINTS_DATA = (
-        ("/admin/register", "post"),
-        ("/customer/details", "post"),
-        ("/customer/details/1", "get"),
-        ("/customer/details/1", "put"),
-        ("/customer/details/1/profile_picture", "delete"),
-        ("/shop_owner/details", "post"),
-        ("/shop_owner/details/1", "put"),
-        ("/shop_owner/details/1", "get"),
-        ("/shop_owner/details/1/verify", "put"),
-        ("/shop_owner/details/1/profile_picture", "delete"),
-        ("delivery_address_details", "get"),
-        ("delivery_address_details/1", "get"),
-        ("delivery_address_details/1", "put"),
-        ("delivery_address_details/1", "delete"),
-        ("shop", "post"),
-        ("shop/1", "put"),
-        ("shop/1", "delete"),
-        ("shop/1/verify", "put"),
-        ("shop/1/deactivate", "put"),
-        ("/shop/1/brand_logo", "delete"),
-
+    LOGIN_REQUIRED_ENDPOINTS = (
+        Endpoints.REGISTER_ADMIN,
+        Endpoints.CREATE_CUSTOMER_DETAILS,
+        Endpoints.GET_CUSTOMER_DETAILS,
+        Endpoints.EDIT_CUSTOMER_DETAILS,
+        Endpoints.DELETE_CUSTOMER_PROFILE_PICTURE,
+        Endpoints.CREATE_SHOP_OWNER_DETAILS,
+        Endpoints.GET_SHOP_OWNER_DETAILS,
+        Endpoints.EDIT_SHOP_OWNER_DETAILS,
+        Endpoints.VERIFY_SHOP_OWNER_DETAILS,
+        Endpoints.DELETE_SHOP_OWNER_PROFILE_PICTURE,
+        Endpoints.GET_LIST_DELIVERY_ADDRESS,
+        Endpoints.GET_DELIVERY_ADDRESS,
+        Endpoints.EDIT_DELIVERY_ADDRESS,
+        Endpoints.DELETE_DELIVERY_ADDRESS,
+        Endpoints.CREATE_SHOP,
+        Endpoints.EDIT_SHOP,
+        Endpoints.DELETE_SHOP,
+        Endpoints.VERIFY_SHOP,
+        Endpoints.DEACTIVATE_SHOP,
+        Endpoints.DELETE_SHOP_BRAND_LOGO,
     )
+
+    class MockedInstance(object):
+        holder_id = None
 
     def setUp(self):
         super().setUp()
@@ -43,10 +49,11 @@ class TestApp(BaseTestCase):
         if not headers:
             headers = {}
 
-        for url, method in endpoints_data:
+        for endpoint in endpoints_data:
+            url, method = endpoint
+            print(f"Testing: {endpoint}")
             request = getattr(self.client, method)
-            resp = request(url, headers=headers)
-            print(f"Testing: {url}")
+            resp = request(url.replace("<int:pk>", "1"), headers=headers)
             status_code_method(resp)
             if expected_resp_body:
                 self.assertEqual(resp.json, expected_resp_body)
@@ -59,7 +66,7 @@ class TestApp(BaseTestCase):
 
     def test_login_required(self):
         self._iterate_endpoints(
-            self.ENDPOINTS_DATA,
+            self.LOGIN_REQUIRED_ENDPOINTS,
             self.assert_401,
             expected_resp_body={"message": AuthManager.MISSING_TOKEN_MESSAGE}
         )
@@ -67,7 +74,7 @@ class TestApp(BaseTestCase):
     def test_invalid_token_raises(self):
         headers = {"Authorization": "Bearer Invalid Token"}
         self._iterate_endpoints(
-            self.ENDPOINTS_DATA,
+            self.LOGIN_REQUIRED_ENDPOINTS,
             self.assert_401,
             expected_resp_body={"message": AuthManager.INVALID_TOKEN_MESSAGE},
             headers=headers
@@ -75,7 +82,7 @@ class TestApp(BaseTestCase):
 
     def test_missing_permissions_for_admin_raises(self):
         endpoints = (
-            ("/admin/register", "post"),
+            Endpoints.REGISTER_ADMIN,
         )
         user = AdminFactory()
 
@@ -88,18 +95,17 @@ class TestApp(BaseTestCase):
 
     def test_missing_permissions_for_customer_raises(self):
         endpoints = (
-            ("/admin/register", "post"),
-            ("/shop_owner/details", "post"),
-            ("/shop_owner/details/1", "put"),
-            ("/shop_owner/details/1/verify", "put"),
-            ("/shop_owner/details/1/profile_picture", "delete"),
-            ("/shop", "post"),
-            ("shop/1", "put"),
-            ("shop/1", "delete"),
-            ("/shop/1/verify", "put"),
-            ("/shop/1/brand_logo", "delete"),
-            ("shop/1/deactivate", "put"),
-
+            Endpoints.REGISTER_ADMIN,
+            Endpoints.CREATE_SHOP_OWNER_DETAILS,
+            Endpoints.EDIT_SHOP_OWNER_DETAILS,
+            Endpoints.VERIFY_SHOP_OWNER_DETAILS,
+            Endpoints.DELETE_SHOP_OWNER_PROFILE_PICTURE,
+            Endpoints.CREATE_SHOP,
+            Endpoints.EDIT_SHOP,
+            Endpoints.DELETE_SHOP,
+            Endpoints.VERIFY_SHOP,
+            Endpoints.DELETE_SHOP_BRAND_LOGO,
+            Endpoints.DEACTIVATE_SHOP
         )
         user = CustomerFactory()
 
@@ -112,17 +118,17 @@ class TestApp(BaseTestCase):
 
     def test_missing_permissions_for_shop_owner_raises(self):
         endpoints = (
-            ("/admin/register", "post"),
-            ("/customer/details", "post"),
-            ("/customer/details/1", "put"),
-            ("/customer/details/1/profile_picture", "delete"),
-            ("/delivery_address_details", "post"),
-            ("/delivery_address_details", "get"),
-            ("/delivery_address_details/1", "put"),
-            ("/delivery_address_details/1", "get"),
-            ("/delivery_address_details/1", "delete"),
-            ("/shop_owner/details/1/verify", "put"),
-            ("/shop/1/verify", "put"),
+            Endpoints.REGISTER_ADMIN,
+            Endpoints.CREATE_CUSTOMER_DETAILS,
+            Endpoints.EDIT_CUSTOMER_DETAILS,
+            Endpoints.DELETE_CUSTOMER_PROFILE_PICTURE,
+            Endpoints.CREATE_DELIVERY_ADDRESS,
+            Endpoints.GET_LIST_DELIVERY_ADDRESS,
+            Endpoints.EDIT_DELIVERY_ADDRESS,
+            Endpoints.GET_DELIVERY_ADDRESS,
+            Endpoints.DELETE_DELIVERY_ADDRESS,
+            Endpoints.VERIFY_SHOP_OWNER_DETAILS,
+            Endpoints.VERIFY_SHOP,
 
         )
         user = OwnerFactory()
@@ -134,21 +140,21 @@ class TestApp(BaseTestCase):
             headers=self._crate_auth_header(user)
         )
 
-    def test_missing_permissions_for_not_holder_raises(self):
+    @patch("utils.helpers.get_or_404", return_value=MockedInstance)
+    @patch.object(ValidateSchema, "validate", return_value=True)
+    def test_missing_permissions_for_not_holder_raises(self, mock_page_exist, mocked_validation):
         endpoints = (
-            ("/customer/details/1", "put"),
-            ("/customer/details/1/profile_picture", "delete"),
-            ("/delivery_address_details/1", "put"),
-            ("/delivery_address_details/1", "get"),
-            ("/delivery_address_details/1", "delete"),
-            ("/shop_owner/details/1", "put"),
-            ("/shop_owner/details/1/profile_picture", "delete"),
-            ("shop/1", "put"),
-            ("/shop/1/brand_logo", "delete"),
-            ("shop/1", "put"),
-            ("shop/1", "delete"),
-            ("shop/1/deactivate", "put"),
-
+            Endpoints.EDIT_CUSTOMER_DETAILS,
+            Endpoints.DELETE_CUSTOMER_PROFILE_PICTURE,
+            Endpoints.EDIT_SHOP_OWNER_DETAILS,
+            Endpoints.DELETE_SHOP_OWNER_PROFILE_PICTURE,
+            Endpoints.GET_DELIVERY_ADDRESS,
+            Endpoints.EDIT_DELIVERY_ADDRESS,
+            Endpoints.DELETE_DELIVERY_ADDRESS,
+            Endpoints.EDIT_SHOP,
+            Endpoints.DELETE_SHOP,
+            Endpoints.DEACTIVATE_SHOP,
+            Endpoints.DELETE_SHOP_BRAND_LOGO,
         )
 
         user = CustomerFactory()
@@ -160,26 +166,29 @@ class TestApp(BaseTestCase):
             headers=self._crate_auth_header(user)
         )
 
-    def test_page_not_found_raises(self):
+    @patch.object(ValidateSchema, "validate", return_value=True)
+    @patch.object(RemoveIbanSpacesMixin, "get_data", return_value=None)
+    def test_page_not_found_raises(self, mock_validation, mocked_data):
         endpoints = (
-            ("/customer/details/1", "get"),
-            ("/customer/details/1", "put"),
-            ("/customer/details/1/profile_picture", "delete"),
-            ("/shop_owner/details/1", "get"),
-            ("/shop_owner/details/1", "put"),
-            ("/shop_owner/details/1/profile_picture", "delete"),
-            ("/shop_owner/details/1/verify", "put"),
-            ("/delivery_address_details/1", "get"),
-            ("/delivery_address_details/1", "put"),
-            ("/delivery_address_details/1", "delete"),
-            ("shop/1", "get"),
-            ("shop/1", "delete"),
-            ("shop/1", "put"),
-            ("shop/1/deactivate", "put"),
+            Endpoints.GET_CUSTOMER_DETAILS,
+            Endpoints.EDIT_CUSTOMER_DETAILS,
+            Endpoints.DELETE_CUSTOMER_PROFILE_PICTURE,
+            Endpoints.GET_SHOP_OWNER_DETAILS,
+            Endpoints.EDIT_SHOP_OWNER_DETAILS,
+            Endpoints.VERIFY_SHOP_OWNER_DETAILS,
+            Endpoints.DELETE_SHOP_OWNER_PROFILE_PICTURE,
+            Endpoints.GET_DELIVERY_ADDRESS,
+            Endpoints.EDIT_DELIVERY_ADDRESS,
+            Endpoints.DELETE_DELIVERY_ADDRESS,
+            Endpoints.EDIT_SHOP,
+            Endpoints.DELETE_SHOP,
+            Endpoints.VERIFY_SHOP,
+            Endpoints.DEACTIVATE_SHOP,
+            Endpoints.DELETE_SHOP_BRAND_LOGO,
         )
-        user = SuperAdminFactory()
+        admin = SuperAdminFactory()
         self._iterate_endpoints(
             endpoints,
             self.assert_404,
-            headers=self._crate_auth_header(user)
+            headers=self._crate_auth_header(admin)
         )

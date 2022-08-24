@@ -2,18 +2,17 @@ from unittest.mock import patch
 
 from db import db
 from models import ShopOwnerModel, ShopOwnerDetailsModel
-from resources.details_resources.shop_owner_details_resources import ShopOwnerDetailsResource
 from resources.helpers.access_endpoint_validators import ValidateUniqueness
 from services.s3 import s3
 from tests import helpers
 from tests.base_test_case import BaseTestCase
-from tests.constants import ENCODED_PICTURE
+from tests.constants import ENCODED_PICTURE, Endpoints
 from tests.factories import OwnerFactory, AdminFactory
 from tests.helpers import generate_token
 
 
 class TestShopOwnerDetails(BaseTestCase):
-    URL = "/shop_owner/details"
+    URL = Endpoints.SHOP_OWNER_DETAILS
     VALID_REQUIRED_DATA = {
         "first_name": "Testcho",
         "last_name": "Testchov",
@@ -157,7 +156,7 @@ class TestShopOwnerDetails(BaseTestCase):
         resp = self.client.get(url, headers=self._AUTHORIZATION_HEADER)
 
         self.assertEqual(404, resp.status_code)
-        self.assertEqual(ShopOwnerDetailsResource.NOT_FOUND_MESSAGE, resp.json["message"])
+        self.assertEqual("Page not found!", resp.json["message"])
 
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_edit_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):

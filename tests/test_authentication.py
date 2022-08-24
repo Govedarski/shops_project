@@ -8,13 +8,14 @@ from resources.helpers.access_endpoint_validators import ValidateRole
 from schemas.validators.common_validators import ValidateIsAlphaNumeric
 from tests import helpers as test_helpers
 from tests.base_test_case import BaseTestCase
+from tests.constants import Endpoints
 from tests.factories import SuperAdminFactory, AdminFactory, CustomerFactory, OwnerFactory
 from tests.helpers import generate_token
 from utils import helpers
 
 
 class TestUserRegistration(BaseTestCase):
-    URL = "/register"
+    URL = Endpoints.REGISTER_USER[0]
     VALID_CUSTOMER_DATA = {"username": "test", "email": "test@test.com", "password": "testP@ss1!", "role": "customer"}
     VALID_OWNER_DATA = {"username": "test", "email": "test@test.com", "password": "testP@ss1!", "role": "owner"}
 
@@ -74,7 +75,7 @@ class TestUserRegistration(BaseTestCase):
 
 
 class TestAdminRegistration(BaseTestCase):
-    URL = "/admin/register"
+    URL = Endpoints.REGISTER_ADMIN[0]
 
     def setUp(self):
         super().setUp()
@@ -91,11 +92,13 @@ class TestAdminRegistration(BaseTestCase):
         test_helpers.assert_count_equal(1, AdminModel)
 
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
-        self.assertEqual(204, resp.status_code)
+        self.assertEqual(200, resp.status_code)
+        self.assertDictEqual({"updated": True}, resp.json)
         test_helpers.assert_count_equal(2, AdminModel)
 
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
-        self.assertEqual(204, resp.status_code)
+        self.assertEqual(200, resp.status_code)
+        self.assertDictEqual({"updated": True}, resp.json)
         test_helpers.assert_count_equal(3, AdminModel)
 
     def test_create_admin_with_duplicate_user_expect_400(self):
@@ -130,7 +133,7 @@ class TestAdminRegistration(BaseTestCase):
 
 
 class TestLogin(BaseTestCase):
-    URL = "/login"
+    URL = Endpoints.LOGIN[0]
     VAlID_CREDENTIALS = {
         "username": "test",
         "email": "test@test.com",

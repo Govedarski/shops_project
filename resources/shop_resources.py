@@ -2,9 +2,8 @@ from flask import request
 
 from managers.auth_manager import auth
 from managers.shop_manager import ShopManager
-from models import ShopModel, UserRoles, AdminRoles
-from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema, ValidateIsHolder, \
-    ValidatePageExist
+from models import UserRoles, AdminRoles
+from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema
 from resources.helpers.base_resources import VerifyBaseResource, RemoveImageBaseResource
 from resources.helpers.resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
     GetListResourceMixin, DeleteResourceMixin
@@ -27,7 +26,6 @@ class ShopGetSchemaOutMixin:
 
 class ShopResource(ShopGetSchemaOutMixin, CreateResourceMixin, GetListResourceMixin):
     MANAGER = ShopManager
-    MODEL = ShopModel
     SCHEMA_IN = ShopCreateSchemaIn
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
@@ -55,13 +53,9 @@ class ShopResource(ShopGetSchemaOutMixin, CreateResourceMixin, GetListResourceMi
 
 class ShopSingleResource(ShopGetSchemaOutMixin, GetResourceMixin, EditResourceMixin, DeleteResourceMixin):
     MANAGER = ShopManager
-    MODEL = ShopModel
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
     @auth.login_optional
-    @execute_access_validators(
-        ValidatePageExist(),
-    )
     def get(self, pk):
         user = auth.current_user()
         return super().get(pk, user=user)
@@ -69,31 +63,29 @@ class ShopSingleResource(ShopGetSchemaOutMixin, GetResourceMixin, EditResourceMi
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
         ValidateSchema()
     )
     def put(self, pk):
-        return super().put(pk)
+        current_user = auth.current_user()
+        return super().put(pk, holder_required=True, user=current_user)
 
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
     )
     def delete(self, pk):
-        return super().delete(pk)
+        current_user = auth.current_user()
+        return super().delete(pk, holder_required=True, user=current_user)
 
     def get_schema_in(self, *args, **kwargs):
-        # get object always returns shop because page exist validation is past
         pk = kwargs.get("pk")
-        return ShopVerifiedEditSchemaIn if self.get_object(pk).verified else ShopNotVerifiedEditSchemaIn
+        model = self.get_manager().get_model()
+        obj = helpers.get_or_404(model, pk)
+        return ShopVerifiedEditSchemaIn if obj.verified else ShopNotVerifiedEditSchemaIn
 
 
 class BrandLogoResource(RemoveImageBaseResource):
     MANAGER = ShopManager
-    MODEL = ShopModel
     SCHEMA_OUT = ShopExtendedSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
     IMAGE_FIELD_NAME = "brand_logo"
@@ -101,7 +93,6 @@ class BrandLogoResource(RemoveImageBaseResource):
 
 class VerifyShopResource(VerifyBaseResource):
     MANAGER = ShopManager
-    MODEL = ShopModel
     SCHEMA_OUT = ShopExtendedSchemaOut
     ALLOWED_ROLES = [AdminRoles.admin, AdminRoles.super_admin]
 
@@ -112,18 +103,15 @@ class VerifyShopResource(VerifyBaseResource):
 
 class DeactivateShopResource(EditResourceMixin):
     MANAGER = ShopManager
-    MODEL = ShopModel
     SCHEMA_OUT = ShopExtendedSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
     )
     def put(self, pk):
-        return super().put(pk)
+        return super().put(pk, holder_required=True, user=auth.current_user())
 
     def get_data(self):
         return {"active": False}

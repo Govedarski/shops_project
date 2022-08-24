@@ -1,9 +1,9 @@
 from managers.auth_manager import auth
-from managers.crud_manager import CRUDManager
-from models import AdminRoles, DeliveryAddressDetailsModel, UserRoles, CustomerDetailsModel
+from managers.details_managers.DeliveryAddressManager import DeliveryAddressDetailsManager
+from managers.details_managers.customer_details_manager import CustomerDetailsManager
+from models import AdminRoles, UserRoles
 from resources.details_resources.base_details_resources import DetailsResource
-from resources.helpers.access_endpoint_validators import ValidatePageExist, ValidateRole, ValidateSchema, \
-    ValidateIsHolder
+from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema
 from resources.helpers.resources_mixins import CreateResourceMixin, GetListResourceMixin, \
     DeleteResourceMixin
 from schemas.request.details_schemas_in.delivery_address_details_schemas_in import \
@@ -14,7 +14,7 @@ from utils.resource_decorators import execute_access_validators
 
 
 class DeliveryAddressDetailsResource(CreateResourceMixin, GetListResourceMixin):
-    MODEL = DeliveryAddressDetailsModel
+    MANAGER = DeliveryAddressDetailsManager
     SCHEMA_OUT = DeliveryAddressDetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.customer]
 
@@ -59,33 +59,31 @@ class DeliveryAddressDetailsResource(CreateResourceMixin, GetListResourceMixin):
 
     def _create_customer_details(self, user):
         data = self.get_data()
-        CRUDManager.create(CustomerDetailsModel,
-                           {"first_name": data["first_name"],
-                            "last_name": data["last_name"]}, user)
+        CustomerDetailsManager.create(
+            {"first_name": data["first_name"],
+             "last_name": data["last_name"]}
+            , user)
 
 
 class DeliveryAddressDetailsSingleResource(DetailsResource, DeleteResourceMixin):
-    MODEL = DeliveryAddressDetailsModel
+    MANAGER = DeliveryAddressDetailsManager
     SCHEMA_IN = EditDeliveryAddressDetailsSchemaIn
     SCHEMA_OUT = DeliveryAddressDetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.customer, AdminRoles.admin, AdminRoles.super_admin]
-    NOT_FOUND_MESSAGE = "Delivery address details_schemas_in not found!"
 
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
     )
     def get(self, pk):
-        return super().get(pk=pk)
+        user = auth.current_user()
+        return super().get(pk=pk, holder_required=True, user=user)
 
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
     )
     def delete(self, pk):
         # TODO: If DAD is linked to order deleting forbidden
-        return super().delete(pk=pk)
+        user = auth.current_user()
+        return super().delete(pk=pk, holder_required=True, user=user)

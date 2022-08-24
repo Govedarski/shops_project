@@ -1,6 +1,5 @@
 from managers.auth_manager import auth
-from resources.helpers.access_endpoint_validators import ValidateRole, ValidateUniqueness, ValidateSchema, \
-    ValidatePageExist, ValidateIsHolder
+from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema
 from resources.helpers.resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin
 from utils.resource_decorators import execute_access_validators
 
@@ -9,7 +8,6 @@ class CreateDetailsResource(CreateResourceMixin):
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateUniqueness(),
         ValidateSchema()
     )
     def post(self):
@@ -18,21 +16,18 @@ class CreateDetailsResource(CreateResourceMixin):
 
 class DetailsResource(GetResourceMixin, EditResourceMixin):
     @auth.login_required
-    @execute_access_validators(
-        ValidatePageExist()
-    )
-    def get(self, pk):
-        return super().get(pk)
+    def get(self, pk, *args, **kwargs):
+        return super().get(pk, *args, **kwargs)
 
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateIsHolder(),
-        ValidatePageExist(),
         ValidateSchema()
     )
     def put(self, pk):
-        return super().put(pk)
+        current_user = auth.current_user()
+
+        return super().put(pk, user=current_user, holder_required=True)
 
 
 class RemoveIbanSpacesMixin:
