@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 from db import db
 from models import ShopOwnerModel, ShopOwnerDetailsModel
-from resources.helpers.access_endpoint_validators import ValidateUniqueness
 from services.s3 import s3
 from tests import helpers
 from tests.base_test_case import BaseTestCase
@@ -76,7 +75,7 @@ class TestShopOwnerDetails(BaseTestCase):
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_REQUIRED_DATA)
 
         self.assertEqual(403, resp.status_code)
-        self.assertEqual(ValidateUniqueness.ERROR_MESSAGE, resp.json["message"])
+        self.assertEqual("Unique constraint: Object already exist!", resp.json["message"])
 
     def test_create_so_with_invalid_data_expect_status_400_and_correct_error_messages(self):
         invalid_data = {
@@ -163,10 +162,8 @@ class TestShopOwnerDetails(BaseTestCase):
         details = self._create_owner_details_in_test_db()
 
         url = self.URL + "/" + str(details.id)
-        data = {"first_name": "TestchoEdit",
-                "last_name": "TestchovEdit",
-                "iban": "BG94 RZBB 9155 1060 3623 19",
-                } | self.VALID_PHOTO_DATA
+        data = self.VALID_REQUIRED_DATA.copy() | self.VALID_PHOTO_DATA
+        data.update({"first_name": "testchoEdited"})
 
         resp = self.client.put(url, headers=self._HEADERS, json=data)
 
@@ -184,7 +181,7 @@ class TestShopOwnerDetails(BaseTestCase):
     def test_change_profile_picture_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         details = self._create_owner_details_in_test_db()
 
-        url = self.URL + "/" + str(details.id)
+        url = self.URL + "/" + str(details.id) + "/profile_picture"
         data = self.VALID_PHOTO_DATA
 
         resp = self.client.put(url, headers=self._HEADERS, json=data)

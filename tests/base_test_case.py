@@ -9,7 +9,14 @@ class BaseTestCase(TestCase):
     _HEADER_CONT_TYPE_JSON = {"Content-Type": "application/json"}
 
     def create_app(self):
-        return create_app(TEST_CONFIGURATION)
+        app = create_app(TEST_CONFIGURATION)
+
+        @app.after_request
+        def return_response(response):
+            db.session.commit()
+            return response
+
+        return app
 
     def setUp(self):
         db.init_app(self.app)

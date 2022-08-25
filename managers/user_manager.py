@@ -5,15 +5,17 @@ from db import db
 from managers.auth_manager import AuthManager
 from models import AdminRoles
 from utils import helpers
+from utils.decorators import handle_unique_constrain_violation
 
 
 class UserManager:
-    UNIQUE_VALIDATION_MESSAGE = "Unique constraint violation!"
+    ADMIN_UNIQUE_VALIDATION_MESSAGE = "This user is already admin!"
     CREDENTIALS_ERROR_MESSAGE = "Wrong credentials!"
 
     @classmethod
+    @handle_unique_constrain_violation
     def register(cls, data):
-        user_model = cls._get_model(data.pop("role"))
+        user_model = cls._get_model(data.pop("role").name)
 
         user = user_model(**data)
         db.session.add(user)
@@ -22,7 +24,7 @@ class UserManager:
 
     @classmethod
     def register_admin(cls, data):
-        user_model = cls._get_model(data['role'])
+        user_model = cls._get_model(data['role'].name)
         user = user_model.query.filter_by(id=data["id"]).first()
 
         admin_data = cls._get_admin_data(user)
@@ -30,7 +32,7 @@ class UserManager:
 
         if admin_model.query.filter_by(username=admin_data["username"]).first() or \
                 admin_model.query.filter_by(email=admin_data["email"]).first():
-            raise BadRequest(cls.UNIQUE_VALIDATION_MESSAGE)
+            raise BadRequest(cls.ADMIN_UNIQUE_VALIDATION_MESSAGE)
 
         admin = admin_model(**admin_data)
         db.session.add(admin)

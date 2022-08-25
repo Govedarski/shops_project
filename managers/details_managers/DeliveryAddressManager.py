@@ -1,6 +1,6 @@
-from managers.base_manager import CRUDManager
+from managers.base_manager import BaseManager
 from models import DeliveryAddressDetailsModel
 
 
-class DeliveryAddressDetailsManager(CRUDManager):
+class DeliveryAddressDetailsManager(BaseManager):
     MODEL = DeliveryAddressDetailsModel

@@ -1,5 +1,6 @@
 from marshmallow import fields, Schema, validate
 from marshmallow_enum import EnumField
+from werkzeug.security import generate_password_hash
 
 from models import UserRoles, CustomerModel, ShopOwnerModel
 from schemas.validators.common_validators import ValidateUniqueness, ValidateIsAlphaNumeric
@@ -24,7 +25,19 @@ class RegisterSchemaIn(Schema):
     password = fields.Str(required=True,
                           validate=PasswordValidator().validate_password)
 
+    def hash_password(self, data, *args, **kwargs):
+        data["password"] = generate_password_hash(data["password"])
+        return data
+
 
 class RegisterAdminSchemaIn(Schema):
     id = fields.Integer(required=True)
     role = EnumField(UserRoles, required=True, error_messages={'by_name': "Invalid role"})
+
+
+class LoginSchemaIn(Schema):
+    identifier = fields.Str(required=True)
+
+    password = fields.Str(required=True)
+
+    role = fields.Str(required=True)

@@ -11,7 +11,7 @@ from tests.factories import OwnerFactory, AdminFactory, CustomerFactory
 from tests.helpers import generate_token
 
 
-class TestApp(BaseTestCase):
+class TestShop(BaseTestCase):
     URL = Endpoints.SHOPS
     VALID_DATA = {
         "name": "Testov shop",
@@ -115,11 +115,13 @@ class TestApp(BaseTestCase):
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_create_2_shops_with_same_name_expect_400_correct_json_and_no_record_in_db(self, mocked_s3):
         self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_DATA)
+        helpers.assert_count_equal(1, ShopModel)
+
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_DATA)
 
         self.assertEqual(400, resp.status_code)
         helpers.assert_count_equal(1, ShopModel)
-        self.assertIn("Testov shop is already taken", resp.json["message"]["name"])
+        print(resp.json)
 
     def test_get_shops_and_schema_out_without_query_params_expect_200_and_list_of_all(self):
         [self._create_in_db(ShopModel, self._get_create_data(True), self._shop_owner.id) for _ in range(4)]
@@ -223,13 +225,13 @@ class TestApp(BaseTestCase):
         self.assertEqual(200, resp.status_code)
         self._test_schema_out(resp.json, extended=False)
 
-    def test_get_single_shop_with_no_auth_user_and_inactive_shop_expect_403(self):
+    def test_get_single_shop_with_no_auth_user_and_inactive_shop_expect_404(self):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id)
         url = self.URL + "/" + str(shop.id)
 
         resp = self.client.get(url)
 
-        self.assertEqual(403, resp.status_code)
+        self.assertEqual(404, resp.status_code)
 
     def test_get_with_holder_and_inactive_shop_expect_200_and_list_of_all_shops(self):
         [self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id) for _ in range(4)]
@@ -279,43 +281,48 @@ class TestApp(BaseTestCase):
     def test_edit_not_verified_with_name_and_bulstat_expect_status_200_db_updated_correct_json(self, mocked_s3):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=False), self._shop_owner.id)
         url = self.URL + "/" + str(shop.id)
-        data = {"name": "Edited Shop",
-                "bulstat": "987654321",
-                "city": "Edited city",
-                } | self.VALID_BRAND_PHOTO_DATA
+        edit_data = self.VALID_DATA.copy() | self.VALID_BRAND_PHOTO_DATA
+        edit_data.update({
+            "name": "Edited name",
+            "bulstat": "987654321",
+            "city": "Edited city",
+        })
 
-        resp = self.client.put(url, headers=self._HEADERS, json=data)
+        resp = self.client.put(url, headers=self._HEADERS, json=edit_data)
 
         self.assertEqual(200, resp.status_code)
-        self.assertEqual(data["name"], resp.json["name"])
-        self.assertEqual(data["bulstat"], resp.json["bulstat"])
-        self.assertEqual(data["city"], resp.json["city"])
+        self.assertEqual(edit_data["name"], resp.json["name"])
+        self.assertEqual(edit_data["bulstat"], resp.json["bulstat"])
+        self.assertEqual(edit_data["city"], resp.json["city"])
         self.assertEqual(mocked_s3.return_value, resp.json["brand_logo_image_url"])
-        self.assertEqual(data["name"], shop.name)
-        self.assertEqual(data["bulstat"], shop.bulstat)
-        self.assertEqual(data["city"], shop.city)
+        self.assertEqual(edit_data["name"], shop.name)
+        self.assertEqual(edit_data["bulstat"], shop.bulstat)
+        self.assertEqual(edit_data["city"], shop.city)
         self.assertEqual(mocked_s3.return_value, shop.brand_logo_image_url)
 
-    def test_edit_verified_with_name_and_bulstat_expect_status_400_and_correct_json(self):
+    def test_edit_verified_shop_whit_edited_name_and_bulstat_expect_status_400(self):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
         url = self.URL + "/" + str(shop.id)
-        data = {"name": "Edited Shop",
-                "bulstat": "987654321",
-                "city": "Edited city",
-                } | self.VALID_BRAND_PHOTO_DATA
+        edit_data = self.VALID_DATA.copy() | self.VALID_BRAND_PHOTO_DATA
+        edit_data.update({
+            "name": "Edited name",
+            "bulstat": "987654321",
+            "city": "Edited city",
+        })
 
-        resp = self.client.put(url, headers=self._HEADERS, json=data)
+        resp = self.client.put(url, headers=self._HEADERS, json=edit_data)
 
         self.assertEqual(400, resp.status_code)
-        self.assertIn("name", resp.json["message"])
-        self.assertIn("bulstat", resp.json["message"])
 
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
-    def test_edit_verified_without_name_and_bulstat_expect_status_200_db_updated_correct_json(self, mocked_s3):
+    def test_edit_verified_same_name_and_bulstat_expect_status_200_db_updated_correct_json(self, mocked_s3):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
         url = self.URL + "/" + str(shop.id)
-        data = {"city": "Edited city",
-                } | self.VALID_BRAND_PHOTO_DATA
+        data = self.VALID_DATA.copy() | self.VALID_BRAND_PHOTO_DATA
+        data.update({
+            "name": shop.name,
+            "bulstat": shop.bulstat,
+            "city": "Edited city"})
 
         resp = self.client.put(url, headers=self._HEADERS, json=data)
 
@@ -326,12 +333,11 @@ class TestApp(BaseTestCase):
         self.assertEqual(mocked_s3.return_value, shop.brand_logo_image_url)
 
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
-    def test_change_profile_picture_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
+    def test_change_brand_logo_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         shop = self._create_in_db(ShopModel, self._get_create_data(active=True), self._shop_owner.id)
-        url = self.URL + "/" + str(shop.id)
-        data = self.VALID_BRAND_PHOTO_DATA
+        url = self.URL + "/" + str(shop.id) + "/" + "brand_logo"
 
-        resp = self.client.put(url, headers=self._HEADERS, json=data)
+        resp = self.client.put(url, headers=self._HEADERS, json=self.VALID_BRAND_PHOTO_DATA)
 
         self.assertEqual(200, resp.status_code)
         self.assertEqual(mocked_s3.return_value, resp.json["brand_logo_image_url"])

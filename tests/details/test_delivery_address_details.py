@@ -1,14 +1,14 @@
 from db import db
 from managers.auth_manager import AuthManager
 from models import DeliveryAddressDetailsModel, CustomerDetailsModel
-from resources.helpers.access_endpoint_validators import ValidateRole
+from resources.helpers.access_validators import ValidateRole
 from tests import helpers
 from tests.base_test_case import BaseTestCase
 from tests.factories import CustomerFactory, AdminFactory, OwnerFactory
 from tests.helpers import generate_token, assert_count_equal
 
 
-class TestShopOwnerDetails(BaseTestCase):
+class DeliveryAddressDetails(BaseTestCase):
     URL = "/delivery_address_details"
     DATA_NO_AUTH = {
         "first_name": "Testcho",

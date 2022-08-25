@@ -3,14 +3,14 @@ from flask import request
 from managers.auth_manager import auth
 from managers.shop_manager import ShopManager
 from models import UserRoles, AdminRoles
-from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema
+from resources.helpers.access_validators import ValidateRole, ValidateSchema
 from resources.helpers.base_resources import VerifyBaseResource, RemoveImageBaseResource
 from resources.helpers.resources_mixins import CreateResourceMixin, GetResourceMixin, EditResourceMixin, \
     GetListResourceMixin, DeleteResourceMixin
-from schemas.request.shop_schema_in import ShopCreateSchemaIn, ShopVerifiedEditSchemaIn, ShopNotVerifiedEditSchemaIn
+from schemas.request.shop_schema_in import ShopSchemaIn, ShopChangeBrandLogoSchemaIn
 from schemas.response.shop_schemas_out import ShopExtendedSchemaOut, ShopShortSchemaOut
 from utils import helpers
-from utils.resource_decorators import execute_access_validators
+from utils.decorators import execute_access_validators
 
 
 class ShopGetSchemaOutMixin:
@@ -26,7 +26,7 @@ class ShopGetSchemaOutMixin:
 
 class ShopResource(ShopGetSchemaOutMixin, CreateResourceMixin, GetListResourceMixin):
     MANAGER = ShopManager
-    SCHEMA_IN = ShopCreateSchemaIn
+    SCHEMA_IN = ShopSchemaIn
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
     @auth.login_required
@@ -53,6 +53,7 @@ class ShopResource(ShopGetSchemaOutMixin, CreateResourceMixin, GetListResourceMi
 
 class ShopSingleResource(ShopGetSchemaOutMixin, GetResourceMixin, EditResourceMixin, DeleteResourceMixin):
     MANAGER = ShopManager
+    SCHEMA_IN = ShopSchemaIn
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
 
     @auth.login_optional
@@ -77,18 +78,21 @@ class ShopSingleResource(ShopGetSchemaOutMixin, GetResourceMixin, EditResourceMi
         current_user = auth.current_user()
         return super().delete(pk, holder_required=True, user=current_user)
 
-    def get_schema_in(self, *args, **kwargs):
-        pk = kwargs.get("pk")
-        model = self.get_manager().get_model()
-        obj = helpers.get_or_404(model, pk)
-        return ShopVerifiedEditSchemaIn if obj.verified else ShopNotVerifiedEditSchemaIn
 
-
-class BrandLogoResource(RemoveImageBaseResource):
+class BrandLogoResource(RemoveImageBaseResource, EditResourceMixin):
     MANAGER = ShopManager
+    SCHEMA_IN = ShopChangeBrandLogoSchemaIn
     SCHEMA_OUT = ShopExtendedSchemaOut
     ALLOWED_ROLES = [UserRoles.owner, AdminRoles.admin, AdminRoles.super_admin]
     IMAGE_FIELD_NAME = "brand_logo"
+
+    @auth.login_required
+    @execute_access_validators(
+        ValidateRole(),
+    )
+    def put(self, pk):
+        current_user = auth.current_user()
+        return super().put(pk, holder_required=True, user=current_user)
 
 
 class VerifyShopResource(VerifyBaseResource):

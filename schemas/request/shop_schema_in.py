@@ -1,17 +1,14 @@
 from marshmallow import Schema, validate, fields
 
 from constants.extensions import VALID_PHOTO_EXTENSIONS, VALID_DOCUMENT_EXTENSIONS
-from models import ShopModel
-from schemas.validators.common_validators import ValidateUniqueness, ValidateIsNumeric, ValidateIsAlphaAndSpace, \
+from schemas.validators.common_validators import ValidateIsNumeric, ValidateIsAlphaAndSpace, \
     ValidateExtension
 
 
-class ShopCreateSchemaIn(Schema):
+class ShopSchemaIn(Schema):
     name = fields.Str(required=True,
                       validate=validate.And(
-                          validate.Length(min=2, max=64),
-                          ValidateUniqueness("name", ShopModel).validate,
-                      ))
+                          validate.Length(min=2, max=64)))
 
     bulstat = fields.Str(required=True,
                          validate=validate.And(
@@ -48,39 +45,8 @@ class ShopCreateSchemaIn(Schema):
                                                                              VALID_DOCUMENT_EXTENSIONS).validate)
 
 
-class ShopVerifiedEditSchemaIn(Schema):
-    city = fields.Str(
-        validate=validate.And(
-            validate.Length(min=2, max=64),
-            ValidateIsAlphaAndSpace().validate
-        ))
+class ShopChangeBrandLogoSchemaIn(Schema):
+    brand_logo_photo = fields.String(required=True)
 
-    address = fields.Str()
-
-    website = fields.Url(validate=validate.Length(max=255))
-
-    phone_number = fields.Str(
-        validate=validate.And(
-            validate.Length(equal=9),
-            ValidateIsNumeric().validate
-        ))
-
-    description = fields.Str()
-
-    brand_logo_photo = fields.String()
-
-    brand_logo_extension = fields.String(validate=ValidateExtension("photos", VALID_PHOTO_EXTENSIONS).validate)
-
-
-class ShopNotVerifiedEditSchemaIn(ShopVerifiedEditSchemaIn):
-    name = fields.Str(
-        validate=validate.And(
-            validate.Length(min=2, max=64),
-            ValidateUniqueness("name", ShopModel).validate,
-        ))
-
-    bulstat = fields.Str(
-        validate=validate.And(
-            validate.Length(equal=9),
-            ValidateIsNumeric().validate
-        ))
+    brand_logo_extension = fields.String(required=True,
+                                         validate=ValidateExtension("photos", VALID_PHOTO_EXTENSIONS).validate)

@@ -28,3 +28,5 @@ class ProductModel(db.Model, ImageMixin):
     last_changed = db.Column(db.DateTime, onupdate=func.now())
 
     holder_id = db.Column(db.Integer, db.ForeignKey("shop_owner.id"), nullable=False)
+
+    listed = db.Column(db.Boolean, nullable=False, default=False)

@@ -2,15 +2,14 @@ from managers.auth_manager import auth
 from managers.details_managers.DeliveryAddressManager import DeliveryAddressDetailsManager
 from managers.details_managers.customer_details_manager import CustomerDetailsManager
 from models import AdminRoles, UserRoles
-from resources.details_resources.base_details_resources import DetailsResource
-from resources.helpers.access_endpoint_validators import ValidateRole, ValidateSchema
+from resources.helpers.access_validators import ValidateRole, ValidateSchema
 from resources.helpers.resources_mixins import CreateResourceMixin, GetListResourceMixin, \
-    DeleteResourceMixin
+    DeleteResourceMixin, EditResourceMixin, GetResourceMixin
 from schemas.request.details_schemas_in.delivery_address_details_schemas_in import \
     AuthCreateDeliveryAddressDetailsSchemaIn, NoAuthCreateDeliveryAddressDetailsSchemaIn, \
     EditDeliveryAddressDetailsSchemaIn
 from schemas.response.details_schemas_out import DeliveryAddressDetailsSchemaOut
-from utils.resource_decorators import execute_access_validators
+from utils.decorators import execute_access_validators
 
 
 class DeliveryAddressDetailsResource(CreateResourceMixin, GetListResourceMixin):
@@ -41,7 +40,7 @@ class DeliveryAddressDetailsResource(CreateResourceMixin, GetListResourceMixin):
         current_user = auth.current_user()
         if current_user.role == UserRoles.customer:
             return {"holder_id": current_user.id}
-        return None
+        return {}
 
     def get_schema_in(self):
         current_user = auth.current_user()
@@ -59,13 +58,13 @@ class DeliveryAddressDetailsResource(CreateResourceMixin, GetListResourceMixin):
 
     def _create_customer_details(self, user):
         data = self.get_data()
-        CustomerDetailsManager.create(
+        CustomerDetailsManager().create(
             {"first_name": data["first_name"],
              "last_name": data["last_name"]}
             , user)
 
 
-class DeliveryAddressDetailsSingleResource(DetailsResource, DeleteResourceMixin):
+class DeliveryAddressDetailsSingleResource(GetResourceMixin, EditResourceMixin, DeleteResourceMixin):
     MANAGER = DeliveryAddressDetailsManager
     SCHEMA_IN = EditDeliveryAddressDetailsSchemaIn
     SCHEMA_OUT = DeliveryAddressDetailsSchemaOut
@@ -78,6 +77,14 @@ class DeliveryAddressDetailsSingleResource(DetailsResource, DeleteResourceMixin)
     def get(self, pk):
         user = auth.current_user()
         return super().get(pk=pk, holder_required=True, user=user)
+
+    @auth.login_required
+    @execute_access_validators(
+        ValidateRole(),
+        ValidateSchema())
+    def put(self, pk):
+        current_user = auth.current_user()
+        return super().put(pk, user=current_user, holder_required=True)
 
     @auth.login_required
     @execute_access_validators(

@@ -1,8 +1,8 @@
 from unittest.mock import patch
 
 from managers.auth_manager import AuthManager
-from resources.details_resources.base_details_resources import RemoveIbanSpacesMixin
-from resources.helpers.access_endpoint_validators import ValidateRole, ValidateIsHolder, ValidateSchema
+from resources.helpers.access_validators import ValidateRole, ValidateSchema
+from resources.helpers.resources_mixins import RemoveIbanSpacesMixin
 from tests.base_test_case import BaseTestCase
 from tests.constants import Endpoints
 from tests.factories import CustomerFactory, OwnerFactory, AdminFactory, SuperAdminFactory
@@ -162,7 +162,7 @@ class TestApp(BaseTestCase):
         self._iterate_endpoints(
             endpoints,
             self.assert_403,
-            expected_resp_body={"message": ValidateIsHolder.ERROR_MESSAGE},
+            expected_resp_body={"message": "Permission denied!"},
             headers=self._crate_auth_header(user)
         )
 

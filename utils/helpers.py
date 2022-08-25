@@ -48,7 +48,7 @@ def save_file(path, file):
         f.write(file)
 
 
-def create_photo_from_json(photo_str, extension):
+def create_photo(photo_str, extension):
     file_name = f"{str(uuid.uuid4())}.{extension}"
     return file_name, decode_file(photo_str)
 

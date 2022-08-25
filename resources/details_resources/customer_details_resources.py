@@ -1,29 +1,58 @@
+from managers.auth_manager import auth
 from managers.details_managers.customer_details_manager import CustomerDetailsManager
 from models import UserRoles, AdminRoles
-from resources.details_resources.base_details_resources import CreateDetailsResource, DetailsResource
+from resources.helpers.access_validators import ValidateRole, ValidateSchema
 from resources.helpers.base_resources import RemoveImageBaseResource
-from schemas.request.details_schemas_in.shop_owner_details_schemas_in import CreateDetailsSchemaIn, \
-    EditDetailsSchemaIn
+from resources.helpers.resources_mixins import EditResourceMixin, CreateResourceMixin, GetResourceMixin
+from schemas.request.details_schemas_in.base_details_schemas_in import DetailsSchemaIn, ChangeProfilePictureSchemaIn
 from schemas.response.details_schemas_out import DetailsSchemaOut
+from utils.decorators import execute_access_validators
 
 
-class CreateCustomerDetailsResource(CreateDetailsResource):
+class CreateCustomerDetailsResource(CreateResourceMixin):
     MANAGER = CustomerDetailsManager
-    SCHEMA_IN = CreateDetailsSchemaIn
+    SCHEMA_IN = DetailsSchemaIn
     SCHEMA_OUT = DetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.customer, AdminRoles.admin, AdminRoles.super_admin]
 
+    @auth.login_required
+    @execute_access_validators(
+        ValidateRole(),
+        ValidateSchema())
+    def post(self):
+        return super().post()
 
-class CustomerDetailsResource(DetailsResource):
+
+class CustomerDetailsResource(GetResourceMixin, EditResourceMixin):
     MANAGER = CustomerDetailsManager
-    SCHEMA_IN = EditDetailsSchemaIn
+    SCHEMA_IN = DetailsSchemaIn
     SCHEMA_OUT = DetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.customer, AdminRoles.admin, AdminRoles.super_admin]
 
+    @auth.login_required
+    def get(self, pk, **kwargs):
+        return super().get(pk, **kwargs)
 
-class CustomerProfilePictureResource(RemoveImageBaseResource):
+    @auth.login_required
+    @execute_access_validators(
+        ValidateRole(),
+        ValidateSchema())
+    def put(self, pk):
+        current_user = auth.current_user()
+        return super().put(pk, user=current_user, holder_required=True)
+
+
+class CustomerProfilePictureResource(RemoveImageBaseResource, EditResourceMixin):
     MANAGER = CustomerDetailsManager
+    SCHEMA_IN = ChangeProfilePictureSchemaIn
     SCHEMA_OUT = DetailsSchemaOut
     ALLOWED_ROLES = [UserRoles.customer, AdminRoles.admin, AdminRoles.super_admin]
     IMAGE_FIELD_NAME = "profile_picture"
-    NOT_FOUND_MESSAGE = "Customer details_schemas_in not found!"
+
+    @auth.login_required
+    @execute_access_validators(
+        ValidateRole(),
+    )
+    def put(self, pk):
+        current_user = auth.current_user()
+        return super().put(pk, holder_required=True, user=current_user)

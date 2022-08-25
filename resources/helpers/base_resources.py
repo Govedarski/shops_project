@@ -1,8 +1,8 @@
 from managers.auth_manager import auth
 from models import AdminRoles
-from resources.helpers.access_endpoint_validators import ValidateRole
+from resources.helpers.access_validators import ValidateRole
 from resources.helpers.resources_mixins import EditResourceMixin, DeleteImageResourceMixin
-from utils.resource_decorators import execute_access_validators
+from utils.decorators import execute_access_validators
 
 
 class VerifyBaseResource(EditResourceMixin):

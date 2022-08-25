@@ -1,7 +1,7 @@
-from managers.base_manager import CRUDManager
+from managers.base_manager import BaseManager
 from models import CustomerDetailsModel
 
 
-class CustomerDetailsManager(CRUDManager):
+class CustomerDetailsManager(BaseManager):
     MODEL = CustomerDetailsModel
     UNIQUE = True

@@ -130,7 +130,7 @@ class TestCustomerDetails(BaseTestCase):
     @patch.object(s3, "upload_photo", return_value="some.s3.url")
     def test_change_profile_picture_with_valid_data_expect_status_200_cd_in_db_updated_correct_json(self, mocked_s3):
         customer_details = self._create_customer_details_in_test_db(self.VALID_REQUIRED_DATA)
-        url = self.URL + "/" + str(customer_details.id)
+        url = self.URL + "/" + str(customer_details.id) + "/profile_picture"
         data = self.VALID_PHOTO_DATA
 
         resp = self.client.put(url, headers=self._HEADERS, json=data)

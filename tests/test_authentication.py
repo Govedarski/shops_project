@@ -4,7 +4,7 @@ from db import db
 from managers.auth_manager import AuthManager
 from managers.user_manager import UserManager
 from models import CustomerModel, ShopOwnerModel, AdminModel
-from resources.helpers.access_endpoint_validators import ValidateRole
+from resources.helpers.access_validators import ValidateRole
 from schemas.validators.common_validators import ValidateIsAlphaNumeric
 from tests import helpers as test_helpers
 from tests.base_test_case import BaseTestCase
@@ -37,7 +37,7 @@ class TestUserRegistration(BaseTestCase):
 
     def test_reg_customer_with_valid_data_but_already_existing_username_and_email_expect_400_customer_not_added_to_db(
             self):
-        self.client.post(self.URL, headers=self._HEADER_CONT_TYPE_JSON, json=self.VALID_CUSTOMER_DATA)
+        r = self.client.post(self.URL, headers=self._HEADER_CONT_TYPE_JSON, json=self.VALID_CUSTOMER_DATA)
         test_helpers.assert_count_equal(1, CustomerModel)
 
         resp = self.client.post(self.URL, headers=self._HEADER_CONT_TYPE_JSON, json=self.VALID_CUSTOMER_DATA)
@@ -107,13 +107,13 @@ class TestAdminRegistration(BaseTestCase):
         self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
         self.assertEqual(400, resp.status_code)
-        self.assertIn(UserManager.UNIQUE_VALIDATION_MESSAGE, resp.json["message"])
+        self.assertIn(UserManager.ADMIN_UNIQUE_VALIDATION_MESSAGE, resp.json["message"])
         test_helpers.assert_count_equal(2, AdminModel)
 
         self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
         self.assertEqual(400, resp.status_code)
-        self.assertIn(UserManager.UNIQUE_VALIDATION_MESSAGE, resp.json["message"])
+        self.assertIn(UserManager.ADMIN_UNIQUE_VALIDATION_MESSAGE, resp.json["message"])
         test_helpers.assert_count_equal(3, AdminModel)
 
     def test_create_admin_from_not_super_admin_data_expect_403_and_correct_message(self):
