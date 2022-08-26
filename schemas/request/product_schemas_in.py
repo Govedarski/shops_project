@@ -1,7 +1,6 @@
-from marshmallow import Schema, fields, validate, ValidationError, validates_schema, pre_load, post_load
+from marshmallow import Schema, fields, validate, ValidationError, validates_schema
 from marshmallow_enum import EnumField
 
-from managers.auth_manager import auth
 from models import ProductCategories
 
 
@@ -30,22 +29,6 @@ class ProductSchemaIn(Schema):
         if data["listed"] and not data["shops_id"]:
             raise ValidationError("No shops provided")
 
-    @pre_load
-    def pre_load(self, data, **kwargs):
-        print(auth.current_user())
-
-        print("PRE-Dump")
-        print(data)
-        return data
-
-    @post_load
-    def post_load(self, data, **kwargs):
-        print(auth.current_user())
-        data.pop("listed")
-        print("POST-Dump")
-        print(data)
-        return data
-
 
 class EditProductSchemaIn(ProductSchemaIn):
     name = fields.Str(required=True,
@@ -71,5 +54,3 @@ class EditProductSchemaIn(ProductSchemaIn):
     def validate_shops(self, data, **kwargs):
         if data["listed"] and not data["shops_id"]:
             raise ValidationError("No shops provided")
-
-# refactor the schemas_in

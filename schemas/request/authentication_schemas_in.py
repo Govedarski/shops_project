@@ -1,4 +1,4 @@
-from marshmallow import fields, Schema, validate
+from marshmallow import fields, Schema, validate, post_load
 from marshmallow_enum import EnumField
 from werkzeug.security import generate_password_hash
 
@@ -25,6 +25,7 @@ class RegisterSchemaIn(Schema):
     password = fields.Str(required=True,
                           validate=PasswordValidator().validate_password)
 
+    @post_load
     def hash_password(self, data, *args, **kwargs):
         data["password"] = generate_password_hash(data["password"])
         return data

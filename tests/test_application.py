@@ -140,6 +140,9 @@ class TestApp(BaseTestCase):
             headers=self._crate_auth_header(user)
         )
 
+    def _create_product(self):
+        pass
+
     @patch("utils.helpers.get_or_404", return_value=MockedInstance)
     @patch.object(ValidateSchema, "validate", return_value=True)
     def test_missing_permissions_for_not_holder_raises(self, mock_page_exist, mocked_validation):

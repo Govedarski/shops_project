@@ -21,18 +21,16 @@ class BaseManager:
     _INSTANCE = None
 
     @handle_unique_constrain_violation
-    def create(self, data, user, **kwargs):
+    def create(self, data, user, add=True, **kwargs):
         if self._uniqueness_required():
             self._check_uniqueness(user)
 
-        data["holder_id"] = None
-        if hasattr(self.get_model(), "holder_id") and user:
-            data["holder_id"] = user.id
+        data["holder_id"] = self._get_holder_id(user)
 
         if not hasattr(self.get_model(), "get_all_image_field_names"):
-            return self._create_in_db(self.get_model(), data)
+            return self._create_obj(self.get_model(), data, add)
 
-        return self._processed_with_photos(self.get_model(), data)
+        return self._processed_with_photos(self.get_model(), data, flush=add)
 
     def get(self, pk, **kwargs):
         self._check_access(pk, **kwargs)
@@ -83,13 +81,14 @@ class BaseManager:
         return self._INSTANCE
 
     @staticmethod
-    def _create_in_db(model, data):
+    def _create_obj(model, data, add=True):
         instance = model(**data)
-        db.session.add(instance)
-        db.session.flush()
+        if add:
+            db.session.add(instance)
+            db.session.flush()
         return instance
 
-    def _processed_with_photos(self, model, data, instance=None):
+    def _processed_with_photos(self, model, data, instance=None, add=True):
         is_edit = bool(instance)
         image_field_names = model.get_all_image_field_names()
         photo_names = []
@@ -122,7 +121,7 @@ class BaseManager:
                 model.query.filter_by(id=instance.id).update(data)
                 [s3.delete_photo(previous_picture) for previous_picture in previous_pictures if previous_picture]
             else:
-                instance = self._create_in_db(model, data)
+                instance = self._create_obj(model, data, add=add)
 
         except Exception as ex:
             [s3.delete_photo(photo_name) for photo_name in photo_names]
@@ -169,3 +168,7 @@ class BaseManager:
 
     def _uniqueness_required(self):
         return self.UNIQUE
+
+    def _get_holder_id(self, user):
+        if hasattr(self.get_model(), "holder_id") and user:
+            return user.id

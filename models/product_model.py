@@ -16,6 +16,8 @@ class ProductModel(db.Model, ImageMixin):
 
     name = db.Column(db.String(64), nullable=False)
 
+    product_image_url = db.Column(db.String(255))
+
     description = db.Column(db.Text)
 
     quantity = db.Column(db.Integer, nullable=False, default=0)

@@ -35,11 +35,11 @@ class CreateResourceMixin(ABC, BaseResource):
     def post(self, **kwargs):
         data = self.get_data()
         current_user = auth.current_user()
-        instance = self.get_manager()().create(
+        instances = self.get_manager()().create(
             data,
             current_user,
             **kwargs)
-        return self.get_schema_out(instance=instance)().dump(instance), 201
+        return self.get_schema_out(instance=instances)(many=isinstance(instances, list)).dump(instances), 201
 
 
 class GetResourceMixin(ABC, BaseResource):

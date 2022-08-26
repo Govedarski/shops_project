@@ -107,7 +107,6 @@ class TestAdminRegistration(BaseTestCase):
         self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
         resp = self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_CUSTOMER_DATA)
         self.assertEqual(400, resp.status_code)
-        self.assertIn(UserManager.ADMIN_UNIQUE_VALIDATION_MESSAGE, resp.json["message"])
         test_helpers.assert_count_equal(2, AdminModel)
 
         self.client.post(self.URL, headers=self._HEADERS, json=self.VALID_OWNER_DATA)
