@@ -131,8 +131,9 @@ class BaseManager:
 
         return instance
 
-    def get_model(self):
-        return self.MODEL
+    @classmethod
+    def get_model(cls):
+        return cls.MODEL
 
     @staticmethod
     def _delete_with_photos(model, instance, **kwargs):

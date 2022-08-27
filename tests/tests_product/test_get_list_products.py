@@ -1,4 +1,4 @@
-from models import ProductCategories
+from db import db
 from tests.base_test_case import BaseTestCase
 from tests.constants import Endpoints
 from tests.factories import OwnerFactory, ShopFactory, ProductFactory, CustomerFactory, AdminFactory
@@ -17,20 +17,6 @@ class TessGetListProducts(BaseTestCase):
         token = generate_token(self.shop_owner)
         self.authorization_headers = {"Authorization": f"Bearer {token}"}
         self.products = [ProductFactory(holder_id=self.shop_owner.id, listed=True) for _ in range(3)]
-
-    @classmethod
-    def _get_valid_data(cls, shop_ids=None, listed=False):
-        cls._count += 1
-        if not shop_ids:
-            shop_ids = []
-        return {
-            "name": f"TEST{cls._count}",
-            "quantity": 20,
-            "price": 100,
-            "category": ProductCategories.pets.name,
-            "shops_id": shop_ids,
-            "listed": listed,
-        }
 
     @staticmethod
     def _create_authorization_header(factory):
@@ -142,3 +128,19 @@ class TessGetListProducts(BaseTestCase):
 
         self.assertEqual(200, resp.status_code)
         self.assertEqual(3, len(resp.json))
+
+    def test_with_listed_and_not_products_user_wants_his_own_listed_expect_200_and_correct_json_len(self):
+        second_shop_owner = OwnerFactory()
+        [ProductFactory(holder_id=second_shop_owner.id, listed=False) for _ in range(4)]
+        products = [ProductFactory(holder_id=second_shop_owner.id, listed=True) for _ in range(5)]
+        shop = ShopFactory(active=True, holder_id=self.shop_owner.id)
+        [shop.products.append(product) for product in products]
+        db.session.commit()
+
+        url = self.URL + f"?shop_ids={shop.id}"
+        resp = self.client.get(
+            url,
+            headers=self.authorization_headers)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(5, len(resp.json))

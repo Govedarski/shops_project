@@ -82,14 +82,20 @@ class ProductManager(BaseManager):
 
     @staticmethod
     def _fetch_data(model, criteria, user):
+        filtered_query = model.query
+        if criteria.get("shop_ids"):
+            shop_ids_list = [int(id_) for id_ in criteria.pop("shop_ids").split("-")]
+            filtered_query = db.session.query(model).filter(
+                model.in_shops.any(ShopManager.get_model().id.in_(shop_ids_list))
+            )
         # if not auth user or customer return products by criteria which are listed
         if not user or user.role == UserRoles.customer:
             criteria = criteria | {"listed": True}
-            return model.query.filter_by(**criteria).all()
+            return filtered_query.filter_by(**criteria).all()
 
         # if admin return all products by criteria
         if helpers.is_admin(user):
-            return model.query.filter_by(**criteria).all()
+            return filtered_query.filter_by(**criteria).all()
 
         # if user want his own products
         if criteria.get('holder_id') == str(user.id):
@@ -100,13 +106,13 @@ class ProductManager(BaseManager):
             user_shops = []
             if not criteria.get('listed'):
                 holder_criteria = criteria | {"holder_id": user.id, "listed": False}
-                user_shops = model.query.filter_by(**holder_criteria).all()
+                user_shops = filtered_query.filter_by(**holder_criteria).all()
 
             foreign_criteria = criteria | {"listed": True}
-            foreign_shops = model.query.filter_by(**foreign_criteria).all()
+            foreign_shops = filtered_query.filter_by(**foreign_criteria).all()
             return user_shops + foreign_shops
 
         # if user want someone else products fetch products by criteria which are listed
         if not criteria.get('holder_id') == str(user.id):
             foreign_criteria = criteria | {"listed": True}
-            return model.query.filter_by(**foreign_criteria).all()
+            return filtered_query.filter_by(**foreign_criteria).all()
