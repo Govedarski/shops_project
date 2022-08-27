@@ -1,4 +1,4 @@
-# REST API Shops application - SoftUni exam project
+# REST API: Shops - SoftUni exam project
 
 # About project
 
