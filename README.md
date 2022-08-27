@@ -23,7 +23,7 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 <ul>
 <li>modify site content</li>
 </ul>
-z
+
 <div>Super admins can::</div>
 <ul><li>modify site content</li>
 <li>create admins</li></ul>
@@ -34,11 +34,6 @@ z
 
 ## Run the app
 
-<details>
-<summary> 
-    Click here for more info
-</summary>
-
     For Unix, Linux, macOS, etc.:
         $ export FLASK_APP=hello
         $ flask run
@@ -47,26 +42,12 @@ z
         > set FLASK_APP=hello
         > flask run
 
-</details>
-
 ## Third party services
 
-<details>
-<summary> 
-    Show
-</summary>
-
-    * AWS S3 - service which stores the uploaded files that are uploaded by users
-    * Stripe - payment provider which generate payment links for online payment
-
-</details>
+* AWS S3 - service which stores the uploaded files that are uploaded by users
+* Stripe - payment provider which generate payment links for online payment
 
 ## API Endpoints summary
-
-<details>
-<summary> 
-    Click here for more info. 
- </summary>
 
 <div><a href="#register">Register</a></div>
 <div><a href="#login">Login</a></div>
@@ -74,8 +55,6 @@ z
 <div></div><a href="#sod">Shop owner details</a></div>
 <div><a href="#shops">Shops</a></div>
 <div><a href="#products">Shops</a></div>
-
-</details>
 
 ## Register Endpoints
 
