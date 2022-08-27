@@ -67,8 +67,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /users/register
-    Methid: POST
-    request: TODO
+    Method: POST
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -80,8 +80,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /users/register
-    Methid: Post
-    request: TODO
+    Method: Post
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -97,8 +97,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /login
-    Methid: POST
-    request: TODO
+    Method: POST
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -114,8 +114,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /customer_details
-    Methid: POST
-    request: TODO
+    Method: POST
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -128,8 +128,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /customer_details/<pk>
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -142,8 +142,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /customer_details/<pk>
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -155,8 +155,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /customer_details/<pk>/profile_picture
-    Methid: DELETE
-    request: TODO
+    Method: DELETE
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -173,8 +173,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shop_owner_details
-    Methid: POST
-    request: TODO
+    Method: POST
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -187,8 +187,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shop_owner_details/<pk>
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -201,8 +201,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shop_owner_details/<pk>
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -214,8 +214,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shop_owner_details/<pk>/profile_picture
-    Methid: DELETE
-    request: TODO
+    Method: DELETE
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -227,8 +227,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shop_owner_details/<pk>/verify
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -244,8 +244,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /delivery_address_details
-    Methid: POST
-    request: TODO
+    Method: POST
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -258,8 +258,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /delivery_address_details/<pk>
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -272,8 +272,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /delivery_address_details
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -286,8 +286,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /delivery_address_details/<pk>
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -299,8 +299,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /delivery_address_details/<pk>
-    Methid: Delete
-    request: TODO
+    Method: Delete
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -312,8 +312,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shop_owner_details/<pk>/verify
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -330,8 +330,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shops
-    Methid: POST
-    request: TODO
+    Method: POST
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -343,8 +343,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shops/<pk>
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -356,8 +356,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shops
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -372,8 +372,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shops/<pk>
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -385,8 +385,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shops/<pk>/brand_logo
-    Methid: delete
-    request: TODO
+    Method: delete
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -398,8 +398,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shops/<pk>/verify
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -411,8 +411,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /shops/<pk>/deactivate
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -428,8 +428,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /product
-    Methid: POST
-    request: TODO
+    Method: POST
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -441,8 +441,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /product/<pk>
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -454,8 +454,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /product/<pk>
-    Methid: GET
-    request: TODO
+    Method: GET
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -470,8 +470,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /product/<pk>
-    Methid: PUT
-    request: TODO
+    Method: PUT
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -483,8 +483,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /product/<pk>
-    Methid: DELETE
-    request: TODO
+    Method: DELETE
+    Request: TODO
     Response: TODO
     Description: TODO
 
@@ -496,8 +496,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 </summary>
 
     Url: /product/<pk>/product_photo
-    Methid: delete
-    request: TODO
+    Method: delete
+    Request: TODO
     Response: TODO
     Description: TODO
 
