@@ -1,3 +1,5 @@
+from flask import request
+
 from managers.auth_manager import auth
 from managers.product_manager import ProductManager
 from models import UserRoles, AdminRoles
@@ -26,3 +28,11 @@ class ProductResource(CreateResourceMixin, GetListResourceMixin):
     def get(self):
         user = auth.current_user()
         return super().get(user=user)
+
+    def filter_by(self):
+        criteria = {}
+        if request.query_string:
+            queries = request.query_string.decode("utf-8").split("&")
+            criteria = {field: criteria for field, criteria in [query.split("=") for query in queries]}
+
+        return criteria

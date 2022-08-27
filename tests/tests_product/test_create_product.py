@@ -10,7 +10,7 @@ from tests.factories import OwnerFactory, ShopFactory
 from tests.helpers import generate_token
 
 
-class TestCreateProduct(BaseTestCase):
+class TestCreateProducts(BaseTestCase):
     URL = Endpoints.PRODUCT
     _count = 0
 

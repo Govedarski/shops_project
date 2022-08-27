@@ -73,7 +73,7 @@ class ShopManager(BaseManager):
             return model.query.filter_by(**criteria).all()
 
         # if user want his own shop fetch his shops
-        if criteria.get('holder_id') == user.id:
+        if criteria.get('holder_id') == str(user.id):
             return model.query.filter_by(**criteria).all()
 
         # if user want all shop fetch his shops and all the rest which are active
@@ -88,6 +88,6 @@ class ShopManager(BaseManager):
             return user_shops + foreign_shops
 
         # if user do  want someone else shops fetch shops by criteria which are active
-        if not criteria.get('holder_id') == user.id:
+        if not criteria.get('holder_id') == str(user.id):
             foreign_criteria = criteria | {"active": True}
             return model.query.filter_by(**foreign_criteria).all()

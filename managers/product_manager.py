@@ -1,11 +1,13 @@
+from sqlalchemy.exc import InvalidRequestError
 from werkzeug.exceptions import BadRequest
 
 from db import db
 from managers.base_manager import BaseManager
 from managers.shop_manager import ShopManager
-from models import ProductModel
+from models import ProductModel, UserRoles
 from services.s3 import s3
 from services.stripeService import StripeService
+from utils import helpers
 from utils.helpers import get_photo_name_by_url
 
 
@@ -67,3 +69,44 @@ class ProductManager(BaseManager):
                 StripeService.deactivate(product.stripe_price_id)
             raise ex
         return product
+
+    def get_list(self, criteria, **kwargs):
+
+        user = kwargs.get('user')
+        try:
+            p = self._fetch_data(self.get_model(), criteria, user)
+            return p
+        except InvalidRequestError:
+            # not sure empty list or BadRequest
+            return []
+
+    @staticmethod
+    def _fetch_data(model, criteria, user):
+        # if not auth user or customer return products by criteria which are listed
+        if not user or user.role == UserRoles.customer:
+            criteria = criteria | {"listed": True}
+            return model.query.filter_by(**criteria).all()
+
+        # if admin return all products by criteria
+        if helpers.is_admin(user):
+            return model.query.filter_by(**criteria).all()
+
+        # if user want his own products
+        if criteria.get('holder_id') == str(user.id):
+            return model.query.filter_by(**criteria).all()
+
+        # if user want all products fetch his products and all the rest which are listed
+        if not criteria.get('holder_id'):
+            user_shops = []
+            if not criteria.get('listed'):
+                holder_criteria = criteria | {"holder_id": user.id, "listed": False}
+                user_shops = model.query.filter_by(**holder_criteria).all()
+
+            foreign_criteria = criteria | {"listed": True}
+            foreign_shops = model.query.filter_by(**foreign_criteria).all()
+            return user_shops + foreign_shops
+
+        # if user want someone else products fetch products by criteria which are listed
+        if not criteria.get('holder_id') == str(user.id):
+            foreign_criteria = criteria | {"listed": True}
+            return model.query.filter_by(**foreign_criteria).all()

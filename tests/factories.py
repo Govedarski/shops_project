@@ -1,9 +1,10 @@
-from random import randint
+from random import randint, uniform
 
 import factory
 
 from db import db
-from models import UserRoles, CustomerModel, AdminModel, AdminRoles, ShopOwnerModel, ShopModel
+from models import UserRoles, CustomerModel, AdminModel, AdminRoles, ShopOwnerModel, ShopModel, ProductModel, \
+    ProductCategories
 
 
 class BaseFactory(factory.Factory):
@@ -78,3 +79,25 @@ class ShopFactory(BaseFactory):
     verifying_documents_image_url = factory.Faker("image_url")
 
     verified = True
+
+
+class ProductFactory(BaseFactory):
+    def __init__(self, listed=True, *args, **kwargs):
+        self.holder_id = kwargs.get("holder_id")
+        self.quantity = str(kwargs.get('quantity')) or str(randint(1, 100))
+        self.listed = listed
+
+    class Meta:
+        model = ProductModel
+
+    id = factory.Sequence(lambda n: n + 100)
+
+    name = factory.Faker("name")
+
+    price = str(round(uniform(1.0, 200.0), 2))
+
+    category = ProductCategories.pets
+
+    stripe_price_id = factory.Sequence(lambda n: n + 100)
+
+    stripe_product_id = factory.Sequence(lambda n: n + 100)
