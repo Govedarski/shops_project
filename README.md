@@ -51,10 +51,10 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 <div><a href="#register">Register</a></div>
 <div><a href="#login">Login</a></div>
-<div></div><a href="#cd">Customer details</a></div>
-<div></div><a href="#sod">Shop owner details</a></div>
-<div></div><a href="#dad">Delivery address details</a></div>
-<div><a href="#shops_endpoints">Shops</a></div>
+<div><a href="#cd">Customer details</a></div>
+<div><a href="#sod">Shop owner details</a></div>
+<div><a href="#dad">Delivery address details</a></div>
+<div><a href="#shops_e">Shops</a></div>
 <div><a href="#products">Products</a></div>
 
 <div id ="register"></div>
@@ -319,7 +319,8 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 </details>
 
-<div id ="#shops_endpoints"></div>
+
+<div id ="shops_e"></div>
 
 ## Shops Endpoints
 
