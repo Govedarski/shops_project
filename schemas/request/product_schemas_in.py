@@ -25,7 +25,8 @@ class ProductSchemaIn(Schema):
     listed = fields.Boolean(required=True, default=False)
 
     @validates_schema
-    def validate_shops(self, data, **kwargs):
+    def sanitize_data(self, data, **kwargs):
+        p = 1
         if data["listed"] and not data["shops_id"]:
             raise ValidationError("No shops provided")
 
@@ -52,5 +53,6 @@ class EditProductSchemaIn(ProductSchemaIn):
 
     @validates_schema
     def validate_shops(self, data, **kwargs):
+        p = 1
         if data["listed"] and not data["shops_id"]:
-            raise ValidationError("No shops provided")
+            raise ValidationError("No shops provided!")

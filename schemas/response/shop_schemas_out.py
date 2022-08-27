@@ -2,6 +2,7 @@ from marshmallow import Schema, fields
 
 
 class ShopShortSchemaOut(Schema):
+    id = fields.Integer(required=True)
     name = fields.Str(required=True)
     city = fields.Str(required=True)
     website = fields.Str()

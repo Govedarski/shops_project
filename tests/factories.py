@@ -1,7 +1,9 @@
+from random import randint
+
 import factory
 
 from db import db
-from models import UserRoles, CustomerModel, AdminModel, AdminRoles, ShopOwnerModel
+from models import UserRoles, CustomerModel, AdminModel, AdminRoles, ShopOwnerModel, ShopModel
 
 
 class BaseFactory(factory.Factory):
@@ -53,3 +55,26 @@ class SuperAdminFactory(BaseUserFactory):
         model = AdminModel
 
     role = AdminRoles.super_admin
+
+
+class ShopFactory(BaseFactory):
+    def __init__(self, active=True, *args, **kwargs):
+        self.holder_id = kwargs.get("holder_id")
+        self.active = active
+
+    class Meta:
+        model = ShopModel
+
+    id = factory.Sequence(lambda n: n + 100)
+
+    name = factory.Faker("name")
+
+    bulstat = str(randint(100000000, 999999999))
+
+    city = factory.Faker("city")
+
+    address = factory.Faker("address")
+
+    verifying_documents_image_url = factory.Faker("image_url")
+
+    verified = True

@@ -27,8 +27,13 @@ class ProductModel(db.Model, ImageMixin):
     category = db.Column(db.Enum(ProductCategories), nullable=False)
 
     registered_on = db.Column(db.DateTime, server_default=func.now(), nullable=False)
+
     last_changed = db.Column(db.DateTime, onupdate=func.now())
 
     holder_id = db.Column(db.Integer, db.ForeignKey("shop_owner.id"), nullable=False)
 
     listed = db.Column(db.Boolean, nullable=False, default=False)
+
+    stripe_price_id = db.Column(db.String(255), unique=True)
+
+    stripe_product_id = db.Column(db.String(255), unique=True)

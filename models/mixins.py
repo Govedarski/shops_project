@@ -1,4 +1,4 @@
-from constants.Image_suffix import IMAGE_SUFFIX_IN_DB
+from constants.image_suffix import IMAGE_SUFFIX_IN_DB
 
 
 class ImageMixin:

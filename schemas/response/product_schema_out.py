@@ -2,6 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from models import ProductCategories
+from schemas.response.shop_schemas_out import ShopShortSchemaOut
 
 
 class ProductSchemaOut(Schema):
@@ -17,7 +18,7 @@ class ProductSchemaOut(Schema):
 
     category = EnumField(ProductCategories, required=True, by_name=True)
 
-    in_shops = fields.List(fields.Integer)
+    in_shops = fields.List(fields.Nested(ShopShortSchemaOut))
 
     holder_id = fields.Integer()
 

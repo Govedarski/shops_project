@@ -17,7 +17,7 @@ class ProductResource(CreateResourceMixin, GetListResourceMixin):
     @auth.login_required
     @execute_access_validators(
         ValidateRole(),
-        ValidateSchema(),
+        ValidateSchema(many=True),
     )
     def post(self):
         return super().post()

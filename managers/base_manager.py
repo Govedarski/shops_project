@@ -3,7 +3,7 @@ import os
 from sqlalchemy.exc import InvalidRequestError
 from werkzeug.exceptions import NotFound, Forbidden
 
-from constants.Image_suffix import IMAGE_SUFFIX_IN_DB, IMAGE_SUFFIX_IN_SCHEMA, EXTENSION_SUFFIX_IN_SCHEMA
+from constants.image_suffix import IMAGE_SUFFIX_IN_DB, IMAGE_SUFFIX_IN_SCHEMA, EXTENSION_SUFFIX_IN_SCHEMA
 from constants.roots import TEMP_DIR
 from db import db
 from models import AdminRoles
@@ -21,16 +21,16 @@ class BaseManager:
     _INSTANCE = None
 
     @handle_unique_constrain_violation
-    def create(self, data, user, add=True, **kwargs):
+    def create(self, data, user, add_to_db=True, **kwargs):
         if self._uniqueness_required():
             self._check_uniqueness(user)
 
         data["holder_id"] = self._get_holder_id(user)
 
         if not hasattr(self.get_model(), "get_all_image_field_names"):
-            return self._create_obj(self.get_model(), data, add)
+            return self._create_obj(self.get_model(), data, add_to_db)
 
-        return self._processed_with_photos(self.get_model(), data, flush=add)
+        return self._processed_with_photos(self.get_model(), data, add_to_db=add_to_db)
 
     def get(self, pk, **kwargs):
         self._check_access(pk, **kwargs)
@@ -81,14 +81,14 @@ class BaseManager:
         return self._INSTANCE
 
     @staticmethod
-    def _create_obj(model, data, add=True):
+    def _create_obj(model, data, add_to_db=True):
         instance = model(**data)
-        if add:
+        if add_to_db:
             db.session.add(instance)
             db.session.flush()
         return instance
 
-    def _processed_with_photos(self, model, data, instance=None, add=True):
+    def _processed_with_photos(self, model, data, instance=None, add_to_db=True):
         is_edit = bool(instance)
         image_field_names = model.get_all_image_field_names()
         photo_names = []
@@ -121,7 +121,7 @@ class BaseManager:
                 model.query.filter_by(id=instance.id).update(data)
                 [s3.delete_photo(previous_picture) for previous_picture in previous_pictures if previous_picture]
             else:
-                instance = self._create_obj(model, data, add=add)
+                instance = self._create_obj(model, data, add_to_db=add_to_db)
 
         except Exception as ex:
             [s3.delete_photo(photo_name) for photo_name in photo_names]

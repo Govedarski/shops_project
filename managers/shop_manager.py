@@ -58,6 +58,9 @@ class ShopManager(BaseManager):
             raise Forbidden(self.DELETE_DENIED_MESSAGE)
         return super().delete(pk)
 
+    def get_shops_by_ids(self, ids):
+        return self.get_model().query.filter(ShopModel.id.in_(ids)).all()
+
     @staticmethod
     def _fetch_data(model, criteria, user):
         # if not auth user or customer return shops by criteria which are active

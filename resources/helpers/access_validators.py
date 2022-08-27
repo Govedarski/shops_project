@@ -23,13 +23,14 @@ class ValidateRole:
 
 
 class ValidateSchema:
-    def __init__(self, schema=None):
+    def __init__(self, schema=None, many=False):
         self.schema = schema
+        self.many = many
 
     def validate(self, instance, *args, **kwargs):
         data = request.get_json()
         schema = self.schema or instance.get_schema_in(*args, **kwargs)
-        errors = schema(many=isinstance(data, list)).validate(data)
+        errors = schema(many=self.many).validate(data)
 
         if errors:
             raise BadRequest(errors)
