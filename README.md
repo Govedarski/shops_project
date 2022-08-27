@@ -54,12 +54,12 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 <div></div><a href="#cd">Customer details</a></div>
 <div></div><a href="#sod">Shop owner details</a></div>
 <div></div><a href="#dad">Delivery address details</a></div>
-<div><a href="#shops">Shops</a></div>
+<div><a href="#shops_endpoints">Shops</a></div>
 <div><a href="#products">Products</a></div>
 
-## Register Endpoints
-
 <div id ="register"></div>
+
+## Register Endpoints
 
 <details>
 <summary> 
@@ -87,10 +87,9 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 </details>
 
-## Login Endpoints
-
 <div id ="login"></div>
 
+## Login Endpoints
 
 <details>
 <summary> 
@@ -105,10 +104,9 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 </details>
 
-## Customer Details Endpoints
-
 <div id ="cd"></div>
 
+## Customer Details Endpoints
 
 <details>
 <summary> 
@@ -164,10 +162,10 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 </details>
 
-## Shop Owner Details Endpoints
 
 <div id ="sod"></div>
 
+## Shop Owner Details Endpoints
 
 <details>
 <summary> 
@@ -236,10 +234,9 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 </details>
 
-## Delivery Address Details Endpoints
-
 <div id ="dad"></div>
 
+## Delivery Address Details Endpoints
 
 <details>
 <summary> 
@@ -322,10 +319,9 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 </details>
 
+<div id ="#shops_endpoints"></div>
+
 ## Shops Endpoints
-
-<div id ="sod"></div>
-
 
 <details>
 <summary> 
@@ -421,10 +417,9 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 
 </details>
 
-## Products Endpoints
-
 <div id ="products"></div>
 
+## Products Endpoints
 
 <details>
 <summary> 
