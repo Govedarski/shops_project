@@ -54,7 +54,7 @@ There is 4 groups of users: customers, shop owners, admins and super admins:
 <div></div><a href="#cd">Customer details</a></div>
 <div></div><a href="#sod">Shop owner details</a></div>
 <div><a href="#shops">Shops</a></div>
-<div><a href="#products">Shops</a></div>
+<div><a href="#products">Products</a></div>
 
 ## Register Endpoints
 
