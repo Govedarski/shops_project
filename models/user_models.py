@@ -35,7 +35,7 @@ class ShopOwnerModel(BaseUserModel):
     role = db.Column(db.Enum(UserRoles), default=UserRoles.owner, nullable=False)
     details = db.relationship('ShopOwnerDetailsModel', backref='shop_owner', uselist=False)
     shops = db.relationship('ShopModel', backref='shop_owner')
-    products = db.relationship('ProductModel', backref='shop_owner')
+    products = db.relationship('ProductModel', backref='shop_owner', lazy='dynamic')
 
 
 class AdminModel(BaseUserModel):

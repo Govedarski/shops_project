@@ -38,6 +38,5 @@ routes = (
 
     (ProductResource, "/product"),  # POST - list of products, GET
     # (ShopSingleResource, "/product/<int:pk>"),  # GET, PUT, DELETE
-    # (VerifyShopResource, "/product/<int:pk>/listed"),  # PUT
     # (ProductPhotoResource, "/product/<int:pk>/photo"),  # DELETE
 )
