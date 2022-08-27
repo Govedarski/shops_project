@@ -1,7 +1,9 @@
 from marshmallow import Schema, fields, validate, ValidationError, validates_schema
 from marshmallow_enum import EnumField
 
+from constants.extensions import VALID_PHOTO_EXTENSIONS
 from models import ProductCategories
+from schemas.validators.common_validators import ValidateExtension
 
 
 class ProductSchemaIn(Schema):
@@ -24,9 +26,12 @@ class ProductSchemaIn(Schema):
 
     listed = fields.Boolean(required=True, default=False)
 
+    product_photo = fields.String()
+
+    product_extension = fields.String(validate=ValidateExtension("photos", VALID_PHOTO_EXTENSIONS).validate)
+
     @validates_schema
     def sanitize_data(self, data, **kwargs):
-        p = 1
         if data["listed"] and not data["shops_id"]:
             raise ValidationError("No shops provided")
 
@@ -53,6 +58,5 @@ class EditProductSchemaIn(ProductSchemaIn):
 
     @validates_schema
     def validate_shops(self, data, **kwargs):
-        p = 1
         if data["listed"] and not data["shops_id"]:
             raise ValidationError("No shops provided!")

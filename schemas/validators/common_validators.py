@@ -1,7 +1,7 @@
 from marshmallow import ValidationError
 from schwifty import IBAN
 
-from schemas.validators.base_custom_validator import BaseCustomValidator
+from schemas.request.base_custom_validator import BaseCustomValidator
 
 
 class ValidateUniqueness(BaseCustomValidator):

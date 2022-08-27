@@ -32,15 +32,14 @@ class StripeService:
     @classmethod
     def update(cls, product, stripe_product_id, stripe_price_id):
         stripe_price_response = cls.update_price(product, stripe_price_id)
-        new_stripe_price_id = stripe_price_response.get('id')
 
-        stripe_product_response = cls.update_product(product, stripe_product_id, new_stripe_price_id)
+        stripe_product_response = cls.update_product(product, stripe_product_id)
         return {
             "product": stripe_product_response,
             "price": stripe_price_response}
 
     @classmethod
-    def update_product(cls, product, stripe_product_id, stripe_price_id):
+    def update_product(cls, product, stripe_product_id):
         return stripe.Product.modify(
             stripe_product_id,
             **cls._get_product_data(product),
@@ -64,7 +63,7 @@ class StripeService:
         return old_price_data
 
     @staticmethod
-    def create_payment_link(price_data, success, cancel):
+    def create_payment_link(price_data, success="https://softuni.bg/", cancel="https://some_url.com"):
         try:
             return stripe.checkout.Session.create(
                 success_url=success,

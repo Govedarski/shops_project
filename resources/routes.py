@@ -5,6 +5,7 @@ from resources.details_resources.delivery_address_resources import \
     DeliveryAddressDetailsResource, DeliveryAddressDetailsSingleResource
 from resources.details_resources.shop_owner_details_resources import CreateShopOwnerDetailsResource, \
     ShopOwnerDetailsResource, ShopOwnerProfilePictureResource, VerifyShopOwnerDetailsResource
+from resources.order_resources import OrderResource
 from resources.product_rescources import ProductResource
 from resources.shop_resources import ShopResource, ShopSingleResource, VerifyShopResource, BrandLogoResource, \
     DeactivateShopResource
@@ -36,7 +37,10 @@ routes = (
     (DeactivateShopResource, "/shops/<int:pk>/deactivate"),  # PUT
     (BrandLogoResource, "/shops/<int:pk>/brand_logo"),  # DELETE
 
-    (ProductResource, "/product"),  # POST - list of products, GET
-    # (ShopSingleResource, "/product/<int:pk>"),  # GET, PUT, DELETE
+    (ProductResource, "/products"),  # POST - list of products, GET
+    # (ShopSingleResource, "/products/<int:pk>"),  # GET, PUT, DELETE
     # (ProductPhotoResource, "/product/<int:pk>/photo"),  # DELETE
+
+    (OrderResource, "/orders")
+
 )

@@ -27,3 +27,7 @@ class ProductCategories(Enum):
     gardens = "Garden"
     pets = "Pets"
 
+
+class PaymentMethod(Enum):
+    online = "Online"
+    cache = "Cache"

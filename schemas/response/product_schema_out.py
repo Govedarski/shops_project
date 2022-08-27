@@ -23,3 +23,5 @@ class ProductSchemaOut(Schema):
     holder_id = fields.Integer()
 
     listed = fields.Boolean(required=True, default=False)
+
+    product_image_url = fields.String()

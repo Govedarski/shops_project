@@ -36,8 +36,8 @@ class Endpoints:
     DEACTIVATE_SHOP = ("/shops/<int:pk>/deactivate", "put")
     DELETE_SHOP_BRAND_LOGO = ("/shops/<int:pk>/brand_logo", "delete")
 
-    PRODUCT = "/product"
-    CREATE_PRODUCT = ("/product", "get")
+    PRODUCT = "/products"
+    CREATE_PRODUCT = ("/products", "get")
 
 
 # THERE IS NOT ANYTHING BELOW THIS PICTURE
