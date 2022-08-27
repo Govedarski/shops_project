@@ -200,19 +200,19 @@ class TestCreateProduct(BaseTestCase):
 
         resp = self.client.post(
             self.URL,
-            headers=self._create_authorization_header(OwnerFactory),
+            headers=self.authorization_headers,
             json=data)
 
         self.assertEqual(201, resp.status_code)
         test_helpers.assert_count_equal(5, ProductModel)
 
     def test_with_invalid_data_and_many_products_expect_400_and_no_record_in_db(self):
-        data = [self._get_valid_data() for _ in range(5)]
+        data = [self._get_valid_data(listed=False, shop_ids=self.shop_ids) for _ in range(5)]
 
         resp = self.client.post(
             self.URL,
             headers=self._create_authorization_header(OwnerFactory),
-            json=[data])
+            json=data)
 
         self.assertEqual(400, resp.status_code)
         test_helpers.assert_count_equal(0, ProductModel)
@@ -225,7 +225,7 @@ class TestCreateProduct(BaseTestCase):
 
         resp = self.client.post(
             self.URL,
-            headers=self._create_authorization_header(OwnerFactory),
+            headers=self.authorization_headers,
             json=data)
 
         self.assertEqual(400, resp.status_code)
