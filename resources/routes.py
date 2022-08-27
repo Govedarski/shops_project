@@ -9,6 +9,7 @@ from resources.order_resources import OrderResource
 from resources.product_rescources import ProductResource
 from resources.shop_resources import ShopResource, ShopSingleResource, VerifyShopResource, BrandLogoResource, \
     DeactivateShopResource
+from resources.webhook_resource import WebhookResource
 
 routes = (
     (RegisterResource, "/users/register"),  # POST
@@ -41,6 +42,7 @@ routes = (
     # (ShopSingleResource, "/products/<int:pk>"),  # GET, PUT, DELETE
     # (ProductPhotoResource, "/product/<int:pk>/photo"),  # DELETE
 
-    (OrderResource, "/orders")
+    (OrderResource, "/orders"),
 
+    (WebhookResource, "/webhook")
 )

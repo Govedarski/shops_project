@@ -7,6 +7,7 @@ stripe.api_key = config('STRIPE_SECRET_KEY')
 
 class StripeService:
     PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')
+    WEBHOOK_SECRET = config('WEBHOOK_SIGNING_SECRET')
 
     @classmethod
     def create(cls, product):
@@ -73,6 +74,19 @@ class StripeService:
             )
         except Exception as ex:
             raise InternalServerError("Payment is temporarily unavailable!")
+
+    @classmethod
+    def webhook(cls, payload, sig_header):
+        endpoint_secret = cls.WEBHOOK_SECRET
+
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+
+        # Handle the checkout.session.completed event
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            return session
 
     @staticmethod
     def retrieve_price(price_id):
